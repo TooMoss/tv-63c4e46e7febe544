@@ -18,21 +18,56 @@
 .cand{display:grid;grid-template-columns:8vw 4vw 8vw 1fr;gap:.6vw;align-items:center;padding:.35vw 0;font-size:1.15vw;border-bottom:1px solid rgba(255,255,255,.06)}
 .badge{padding:.15vw .5vw;border-radius:.4vw;font-weight:700;font-size:1vw;text-align:center}
 svg{display:block;width:100%}.err{position:fixed;bottom:.4vw;right:1vw;font-size:.9vw;color:#ff9b9b}
-</style></head><body><div class="g">
+
+html,body{width:100vw;height:100vh;overflow:hidden}
+body{padding:clamp(4px,1.2vw,40px)}
+#stage{width:100%;height:100%;transform-origin:top left}
+.g{grid-template-rows:minmax(0,1fr)}
+.col{overflow:hidden}
+.col>.card{min-height:0;display:flex;flex-direction:column}
+.chart{flex:1 1 0;min-height:clamp(40px,8vh,400px)}
+.chart svg,#pos svg{width:100%;height:100%;flex:1;min-height:0}
+#poswrap{flex:2 1 0}#pos{flex:1;min-height:0;display:flex;flex-direction:column;gap:.6vh}
+.pos{flex:1;min-height:0}.pos svg{height:100%}
+.feed{flex:1 1 0}#tr{flex:none;display:block}
+.lbl{font-size:clamp(9px,min(1vw,1.8vh),48px)}
+.val{font-size:clamp(28px,min(5.6vw,10vh),260px)}.pnl{font-size:clamp(14px,min(2.3vw,4vh),110px)}
+.live{font-size:clamp(12px,min(2vw,3.6vh),96px)}.cd{font-size:clamp(20px,min(4.2vw,7.5vh),200px)}
+.run{font-size:clamp(10px,min(1.15vw,2vh),56px)}.run b{font-size:clamp(11px,min(1.35vw,2.4vh),64px)}
+.big{font-size:clamp(13px,min(2.2vw,3.9vh),104px)}.sm{font-size:clamp(9px,min(1.1vw,1.95vh),52px)}
+.cand{font-size:clamp(10px,min(1.15vw,2vh),56px)}.badge{font-size:clamp(9px,min(1vw,1.8vh),48px)}
+.err{font-size:clamp(9px,.9vw,40px)}
+@media (orientation:portrait) and (max-width:820px){
+ html,body{height:auto;min-height:100vh;overflow-x:hidden;overflow-y:auto}
+ #stage{transform:none!important;height:auto}
+ .g{grid-template-columns:1fr;height:auto;gap:10px}.col{overflow:visible;gap:10px}
+ .chart{flex:none;height:28vh}.pos svg{height:22vh}#poswrap{flex:none}.feed{flex:none}
+ .lbl,.badge,.err{font-size:11px}.sm{font-size:12px}.run,.cand{font-size:13px}.run b{font-size:14px}
+ .val{font-size:44px}.pnl{font-size:18px}.live{font-size:15px}.cd{font-size:30px}.big{font-size:20px}
+ .cn{font-size:15px}.pinfo{min-width:34vw}.cand{grid-template-columns:22vw 10vw 24vw 1fr}
+}
+.pinfo{flex:none;min-width:13vw;line-height:1.15}.cn{font-size:clamp(11px,min(1.4vw,2.5vh),68px)}.col>.card.top{flex:none;flex-direction:row}
+.val{font-size:clamp(28px,min(5.6vw,8.5vh),260px)!important}.cd{font-size:clamp(18px,min(4.2vw,6vh),200px)!important}
+#hype{flex:none;text-align:center;font-weight:800;font-size:clamp(13px,min(1.7vw,3vh),84px);background:linear-gradient(90deg,rgba(56,216,255,.12),rgba(179,136,255,.14),rgba(46,242,154,.12));overflow:hidden;white-space:nowrap;text-overflow:ellipsis;position:relative}
+#hype span{display:inline-block;animation:hy .7s ease-out}@keyframes hy{0%{opacity:0;transform:translateY(60%)}100%{opacity:1}}
+.cf{position:fixed;top:-3vh;width:clamp(6px,.6vw,24px);height:clamp(10px,1.1vw,40px);z-index:9;pointer-events:none;animation:cf linear forwards}@keyframes cf{to{transform:translateY(110vh) rotate(720deg);opacity:.7}}
+@media (orientation:portrait) and (max-width:820px){#hype{font-size:16px;white-space:normal}}
+</style></head><body><div id="stage"><div class="g">
 <div class="col">
  <div class="card top"><div><div class="lbl">Account value</div><div class="val" id="val">—</div>
   <div class="pnl"><span id="day">—</span> <span class="sm">today</span> &nbsp; <span id="week">—</span> <span class="sm">week</span></div></div>
   <div style="text-align:right"><div id="live" class="live off"><span class="dot"></span><span id="lt">CONNECTING</span></div>
   <div class="lbl" style="margin-top:.8vw">Next run</div><div class="cd cy" id="cd">--:--</div><div class="sm" id="last"></div></div></div>
- <div class="card"><div class="lbl">Equity curve (7 days)</div><svg id="eq" viewBox="0 0 800 170" height="170"></svg></div>
+ <div class="card chart"><div class="lbl">Equity curve (7 days)</div><svg id="eq" viewBox="0 0 800 170" preserveAspectRatio="none"></svg></div>
  <div class="card" id="poswrap"><div class="lbl">Open positions · 1h candles 48h</div><div id="pos"></div></div>
- <div class="card"><div class="lbl" id="rgl">BTC 4h · 50 EMA</div><svg id="btc" viewBox="0 0 800 150" height="150"></svg></div>
+ <div class="card chart"><div class="lbl" id="rgl">BTC 4h · 50 EMA</div><svg id="btc" viewBox="0 0 800 150" preserveAspectRatio="none"></svg></div>
 </div>
 <div class="col">
+ <div class="card" id="hype"><span>Warming up…</span></div>
  <div class="card"><div class="lbl">Top candidates</div><div id="cand"></div></div>
  <div class="card feed"><div class="lbl">Live run feed</div><div id="runs"></div></div>
  <div class="card sm" id="tr"></div>
-</div></div><div class="err" id="err"></div>
+</div></div></div><div class="err" id="err"></div>
 <script>
 const TOPIC="gt25754f4b7928dc2b4b9a442c2db53703",DATA="https://ntfy.sh/"+TOPIC+"/json?poll=1&since=latest",CB="https://api.exchange.coinbase.com/products/";
 let D=null,seen=new Set(),first=true;const $=i=>document.getElementById(i);
@@ -57,15 +92,42 @@ async function charts(){if(!D)return;
 function render(){const d=D;$("val").textContent=m(d.val);$("day").textContent=sg(d.day);$("day").className=cl(d.day);$("week").textContent=sg(d.week);$("week").className=cl(d.week);
  $("last").textContent="Last run "+new Date(d.last).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})+" · cash "+m(d.cash)+" · "+(d.rg.n||"")+" coins";
  const eq=d.eq||[];$("eq").innerHTML=eq.length>1?line(eq,800,170,eq[eq.length-1][1]>=eq[0][1]?"#2ef29a":"#ff4d6d",true):'<text x="10" y="90" fill="#8b93c7" font-size="22">Building history…</text>';
- $("pos").innerHTML=d.pos.length?d.pos.map(p=>`<div class="pos"><div style="min-width:11vw"><div class="big">${p.s.replace("-USD","")}</div><div class="big ${cl(p.u)}">${sg(p.u)}</div><div class="sm ${cl(p.u)}">${p.pct>=0?"+":""}${p.pct}%</div><div class="sm">bid ${fp(p.b)}<br>entry ${fp(p.e)}<br>stop ${fp(p.st)}</div></div><svg id="pc_${p.s}" viewBox="0 0 800 200" height="200"></svg></div>`).join(""):'<div class="big am">All cash — hunting</div>';
+ $("pos").innerHTML=d.pos.length?d.pos.map(p=>`<div class="pos"><div class="pinfo"><div class="big">${p.s.replace("-USD","")} <span class="${cl(p.u)}">${sg(p.u)}</span></div><div class="sm"><span class="${cl(p.u)}">${p.pct>=0?"+":""}${p.pct}%</span> · bid ${fp(p.b)}</div><div class="sm">entry ${fp(p.e)} · stop ${fp(p.st)}</div></div><svg id="pc_${p.s}" viewBox="0 0 800 200" preserveAspectRatio="none"></svg></div>`).join(""):'<div class="big am">All cash — hunting</div>';
  const rg=d.rg;$("rgl").innerHTML=`BTC 6h · 50 EMA · regime: <span class="${rg.buys?'up':'dn'}">${rg.l||""}</span> · breadth ${rg.br}%`;
  const bc=s=>/held/i.test(s)?"background:#1e5b42;color:#2ef29a":/pass|reject|block/i.test(s)?"background:#5b1e2c;color:#ff8da1":"background:#5b4a1e;color:#ffc145";
- $("cand").innerHTML=d.cand.map(c=>`<div class="cand"><b style="font-size:1.4vw">${c.s.replace(/-USDC?$/,"")}</b><span class="cy">${c.sc}</span><span class="badge" style="${bc(c.st)}">${c.st}</span><svg id="sp_${c.s}" viewBox="0 0 160 40" height="40"></svg><div style="grid-column:1/5;font-size:1vw;color:#aab2e6">${c.w}</div></div>`).join("");
+ $("cand").innerHTML=d.cand.map(c=>`<div class="cand"><b class="cn">${c.s.replace(/-USDC?$/,"")}</b><span class="cy">${c.sc}</span><span class="badge" style="${bc(c.st)}">${c.st}</span><svg id="sp_${c.s}" viewBox="0 0 160 40" preserveAspectRatio="none" style="height:clamp(20px,3.5vh,120px)"></svg><div style="grid-column:1/5;font-size:1vw;color:#aab2e6">${c.w}</div></div>`).join("");
  $("runs").innerHTML=d.runs.map(r=>{const k=r.t+r.a+r.r,n=!first&&!seen.has(k);seen.add(k);const c=/buy/i.test(r.a)?"up":/sell|stop/i.test(r.a)?"dn":"am";return`<div class="run ${n?'new':''}"><b class="cy">${r.t}</b> <b class="${c}">${r.a}</b><div>${r.r}</div></div>`}).join("");first=false;
- $("tr").innerHTML="<span class='lbl'>Recent trades</span> "+(d.tr.map(t=>`<span class="${t.a=='BUY'?'up':'dn'}"><b>${t.a}</b></span> ${t.s} @ ${fp(t.p)} (${m(t.n)}) ${t.t}`).join(" · ")||"none")+` · fixes: ${d.fx}`;charts()}
+ $("tr").innerHTML="<span class='lbl'>Recent trades</span> "+(d.tr.map(t=>`<span class="${t.a=='BUY'?'up':'dn'}"><b>${t.a}</b></span> ${t.s} @ ${fp(t.p)} (${m(t.n)}) ${t.t}`).join(" · ")||"none")+` · fixes: ${d.fx}`;charts();try{hype(d)}catch(e){}setTimeout(fit,50)}
 async function poll(){try{const r=await fetch(DATA+"&_="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error(r.status);const ls=(await r.text()).trim().split("\n").filter(Boolean);
  if(ls.length){const j=JSON.parse(JSON.parse(ls[ls.length-1]).message);if(!D||j.asof!==D.asof){D=j;render()}}$("err").textContent=""}catch(e){$("err").textContent="data retry… "+new Date().toLocaleTimeString()}}
 function tick(){if(!D)return;const age=(Date.now()-new Date(D.last))/1000,stale=age>720;$("live").className="live "+(stale?"off":"on");$("lt").textContent=stale?"STALE":"LIVE";
  let s=(new Date(D.next)-Date.now())/1000;if(s<0){s=300-((-s)%300)}if(s>295&&age>300){$("cd").textContent="RUNNING";return}$("cd").textContent=Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0")}
+
+
+let HI=0,hm=[],seenA=new Set(),hfirst=true,peakSeen=0;
+function confetti(){const cs=["#2ef29a","#38d8ff","#ffc145","#b388ff","#ff4d6d"];for(let i=0;i<70;i++){const e=document.createElement("div");e.className="cf";e.style.left=Math.random()*100+"vw";e.style.background=cs[i%5];e.style.animationDuration=2+Math.random()*2.5+"s";e.style.animationDelay=Math.random()*.8+"s";document.body.appendChild(e);setTimeout(()=>e.remove(),5500)}}
+function hype(d){const M=[],runs=d.runs||[];let party=false;const nm=s=>(s||"").replace(/-USDC?$/,"");
+ const halt=runs.slice(0,3).some(r=>/halt|lockout|lock out|daily loss|paused/i.test(r.a+" "+r.r));
+ if(halt)M.push("🧘 Taking a breather. Protecting capital is part of the plan.");
+ runs.forEach(r=>{const k=r.t+r.a+r.r,isNew=!seenA.has(k);seenA.add(k);if(hfirst&&runs.indexOf(r)>2)return;
+  if(/buy/i.test(r.a)&&!/add|pyramid/i.test(r.a+r.r)){if(runs.indexOf(r)<4){const c=(r.a+" "+r.r).match(/([A-Z0-9]{2,10})-USDC?/);M.unshift("🚀 New position: "+(c?c[1]+" — ":"")+"let's ride")}}
+  else if(/add|pyramid|raise|trail/i.test(r.a+" "+r.r)){M.push("📈 Winner growing, stop locked higher");if(isNew&&!hfirst&&/add|pyramid/i.test(r.a+r.r))party=true}});
+ if(d.day!=null){if(d.day>0)M.push("🟢 Green day! "+sg(d.day));else if(d.day<0)M.push("🔴 Red days build green weeks. Stops are doing their job.")}
+ if(d.week>0)M.push("📅 Week so far: "+sg(d.week)+" — nice work");
+ (d.pos||[]).forEach(p=>{if(p.pct>=10){M.push("🔥 "+nm(p.s)+" up "+p.pct+"% — letting it ride");if(!hfirst&&p.pct>=20)party=true}});
+ if(d.val&&d.peak&&d.val>=d.peak&&d.val>peakSeen){if(peakSeen&&!hfirst)party=true;M.unshift("🏆 New account high: "+m(d.val)+"!")}if(d.val>peakSeen)peakSeen=d.val;
+ if(d.rg&&d.rg.buys===false&&!halt)M.push("⏳ Patience pays. Cash is a position.");
+ if(!(d.pos||[]).length&&!halt)M.push("🎯 Scanning every 5 minutes for the next setup");
+ M.push("💪 Discipline over emotion. Every trade has a stop.");
+ hm=[...new Set(M)];if(party)confetti();if(hfirst){HI=0;showHype()}hfirst=false}
+function showHype(){if(!hm.length)return;const t=hm[HI++%hm.length];$("hype").innerHTML="<span>"+t+"</span>"}
+setInterval(showHype,17000);
+function narrow(){return innerWidth<=820&&innerHeight>innerWidth}
+function fit(){const st=$("stage");st.style.transform="";st.style.width=st.style.height="";if(narrow())return;
+ const W=st.clientWidth,H=st.clientHeight,sw=st.scrollWidth,sh=st.scrollHeight;let ow=0,oh=0;
+ st.querySelectorAll(".col,.col>.card:not(.feed):not(#hype),.pos").forEach(c=>{ow=Math.max(ow,c.scrollWidth-c.clientWidth);oh=Math.max(oh,c.scrollHeight-c.clientHeight)});
+ const k=Math.min(W/Math.max(sw,W+ow),H/Math.max(sh,H+oh),1);if(k<.999){st.style.width=W/k+"px";st.style.height=H/k+"px";st.style.transform="scale("+k+")"}}
+let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(fit,120)});addEventListener("orientationchange",()=>setTimeout(fit,300));
+if(window.ResizeObserver)new ResizeObserver(()=>{clearTimeout(rz);rz=setTimeout(fit,120)}).observe(document.body);
 poll();setInterval(poll,30000);setInterval(tick,1000);setInterval(charts,120000);setTimeout(()=>location.reload(),6*3600e3);
 </script></body></html>
