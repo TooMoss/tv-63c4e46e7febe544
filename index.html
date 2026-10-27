@@ -97,7 +97,7 @@ svg{display:block}.sv svg{position:absolute;inset:0;width:100%;height:100%}
  :root{--f:10px}body{padding:8px}
  html,body{max-width:100vw}#stage,.g,.col,.card{max-width:100%;min-width:0}.g>*,.col>*,#hdr>*,.tiles>*,#pos>*{min-width:0}.tile{overflow:hidden}.tile .v{overflow:hidden;text-overflow:ellipsis}
  .g{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;gap:7px}.col{gap:7px}
- #hdr{grid-template-columns:minmax(0,1fr) auto}#pos{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.ht{font-size:12px;word-break:break-word}.val{font-size:34px}.tile .v{font-size:13px}.tiles{grid-template-columns:repeat(4,minmax(0,1fr))}
+ #hdr{grid-template-columns:minmax(0,1fr) auto}#pos{grid-template-columns:minmax(0,1fr)!important;grid-auto-rows:30vh!important}#stage,.g,.col,.card,#pos,.pc{width:100%!important}svg{max-width:100%}.ht{font-size:12px;word-break:break-word}.val{font-size:34px}.tile .v{font-size:13px}.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
  .ring{width:74px}.cd{font-size:15px}.live{font-size:11px}.sm{font-size:11px}
  #hype{font-size:13px;white-space:normal}
  .chart{flex:1 1 0;min-height:70px}#poswrap{flex:2.6 1 0}
@@ -141,6 +141,12 @@ svg{display:block}.sv svg{position:absolute;inset:0;width:100%;height:100%}
  <div class="card" id="tr"></div>
  <div id="phn"><button onclick="det('btc')">₿ BTC</button><button onclick="det('cand')">🎯 Scan</button><button onclick="det('runs')">⚡ Feed</button><button onclick="rvFull()">🧠 Review</button><button onclick="hist()">📜 Trades</button></div>
 </div></div></div><div class="err" id="err"></div><div class="tip" id="tip"></div><div id="ov" onclick="if(event.target===this)cls()"><div id="ovb"></div></div>
+<script>
+// Force phone layout on real phones even if Safari reports a desktop-width viewport ("Request Desktop Website", zoom).
+(function(){const sw=Math.min(screen.width,screen.height),ph=sw<900&&(matchMedia("(pointer:coarse)").matches||"ontouchstart" in window);window.PHONE=ph;if(!ph)return;
+ document.documentElement.classList.add("phone");const vm=document.querySelector('meta[name=viewport]');vm.setAttribute("content","width=device-width,initial-scale=1,viewport-fit=cover");
+ for(const sh of document.styleSheets){let rs;try{rs=sh.cssRules}catch(e){continue}for(const r of rs){if(r.media){const t=r.media.mediaText;if(/899px/.test(t)||(/400px/.test(t)&&sw<=400)){r.media.mediaText="all"}}}}})();
+</script>
 <script>
 const TOPIC="gt25754f4b7928dc2b4b9a442c2db53703",DATA="https://ntfy.sh/"+TOPIC+"/json?poll=1&since=20m",DATA1="https://ntfy.sh/"+TOPIC+"/json?poll=1&since=latest",CB="https://api.exchange.coinbase.com/products/";
 let X=null,EQR="7D",OP=null,TF="1h",PTF="1h",HF="All",D=null,seen=new Set(),first=true,CC={};const $=i=>document.getElementById(i);
@@ -261,7 +267,7 @@ function hype(d){const M=[],runs=d.runs||[];let party=false;
  hm=[...new Set(M)];if(party)confetti();if(hfirst){HI=0;showHype()}hfirst=false}
 function showHype(){if(!hm.length)return;const t=hm[HI++%hm.length];$("hype").innerHTML="<span>"+t+"</span>"}
 setInterval(showHype,15000);
-function narrow(){return innerWidth<900||innerHeight>innerWidth}
+function narrow(){return window.PHONE||innerWidth<900||innerHeight>innerWidth||Math.min(screen.width,screen.height)<900&&matchMedia('(pointer:coarse)').matches}
 function fit(){const st=$("stage");st.style.transform="";st.style.width=st.style.height="";if(narrow())return;
  const W=st.clientWidth,H=st.clientHeight,sw=st.scrollWidth,sh=st.scrollHeight;let ow=0,oh=0;
  st.querySelectorAll(".col,.col>.card:not(.feed):not(#hype):not(#cw):not(#rw):not(#tr),.pc").forEach(c=>{ow=Math.max(ow,c.scrollWidth-c.clientWidth);oh=Math.max(oh,c.scrollHeight-c.clientHeight)});
