@@ -265,25 +265,26 @@ setTimeout(movers,1500);setInterval(movers,150000);
 const save=()=>{try{localStorage.setItem(K,JSON.stringify(L))}catch(e){}};
 window.eqLive=v=>{if(!(v>0))return;const t=Date.now()/1000,l=L[L.length-1];if(l&&t-l[0]<30)return;L.push([Math.round(t),+v.toFixed(2)]);L=L.filter(p=>p[0]>=t-H48);save();if(EQR=="1D"||EQR=="7D")try{drawEq()}catch(e){}};
 window.eqPrune=d=>{const w=d.eq||[];if(!w.length)return;const lt=w[w.length-1][0];/* feed refreshed: live samples up to the newest feed point are superseded */L=L.filter(p=>p[0]>lt);save()};
-const fmt=v=>"$"+(Math.abs(v)>=1e4?Math.round(v).toLocaleString():v.toLocaleString(undefined,{maximumFractionDigits:Math.abs(v)>=1000?0:2}));
+const fmt=v=>"$"+(Math.abs(v)>=1e4?Math.round(v).toLocaleString():v.toLocaleString(undefined,{maximumFractionDigits:Math.abs(v)>=100?0:2}));
 function tparse(str,ref){const mm=/(\d+):(\d+)\s*([AP]M)/i.exec(str||"");if(!mm)return null;let h=+mm[1]%12+(mm[3].toUpperCase()=="PM"?12:0);const r=new Date(ref*1000),d=new Date(r);d.setHours(h,+mm[2],0,0);let t=d/1000;if(t>ref+300)t-=86400;return t}
 let G=null;
 window.drawEq=function(){const sv=$("eq");if(!sv||!D)return;let pts=eqSel().slice();const now=Date.now()/1000,lo={"1D":now-86400,"7D":now-7*86400,"30D":now-30*86400}[EQR]||0;
  const lf=pts.length?pts[pts.length-1][0]:0;pts=pts.concat(L.filter(p=>p[0]>lf&&p[0]>=lo)).sort((a,b)=>a[0]-b[0]);
  const W=Math.max(200,sv.clientWidth|0),Hh=Math.max(60,sv.clientHeight|0);sv.setAttribute("viewBox",`0 0 ${W} ${Hh}`);
  if(pts.length<2){sv.innerHTML=`<text x="10" y="${Hh/2}" fill="#8b93c7" font-size="14">Building history…</text>`;$("eqi").textContent="";return}
- // deposits: step jumps >25% between consecutive points
- const dep=[];for(let i=1;i<pts.length;i++){const a=pts[i-1][1],b=pts[i][1];if(a>0&&(b-a)/a>.25)dep.push([pts[i][0],b-a,i])}
- const all=(X&&X.ea||[]).concat(D.eq||[]);let base=all.length?all[0][1]:pts[0][1];for(let i=1;i<all.length;i++){const a=all[i-1][1],b=all[i][1];if(a>0&&(b-a)/a>.25)base+=b-a}
- 
+ // deposits: actual list from feed (dp), fallback to known deposits
+ const DP=((D.dp&&D.dp.length)?D.dp:[[1793038380,1000],[1793101717,1000]]).slice().sort((a,b)=>a[0]-b[0]);
+ const depAt=t=>DP.reduce((a,q)=>q[0]<=t+60?a+q[1]:a,0);const dep=[];
+ for(let i=1;i<pts.length;i++){const a=depAt(pts[i-1][0]),b=depAt(pts[i][0]);if(b>a)dep.push([pts[i][0],b-a,i])}
+ const base=depAt(pts[pts.length-1][0]);
  // y-range: tight on 1D (or after deposit in-range use segment after last deposit)
  let seg=pts;if(dep.length&&EQR=="1D"&&pts.length-dep[dep.length-1][2]>=2){seg=pts=pts.slice(dep[dep.length-1][2]);dep.length=0}
- const ys=pts.map(p=>p[1]),x0=pts[0][0],x1=pts[pts.length-1][0];let y0=Math.min(...seg.map(p=>p[1])),y1=Math.max(...seg.map(p=>p[1]));if(EQR!="1D"){y0=Math.min(y0,base);y1=Math.max(y1,base)}
+ const ys=pts.map(p=>p[1]),x0=pts[0][0],x1=pts[pts.length-1][0];let y0=Math.min(...seg.map(p=>p[1])),y1=Math.max(...seg.map(p=>p[1]));if(EQR!="1D"){const dl=pts.map(p=>depAt(p[0])).filter(v=>v>0);if(dl.length){y0=Math.min(y0,...dl);y1=Math.max(y1,...dl)}}
  const pad=Math.max((y1-y0)*(EQR=="1D"?.12:.08),EQR=="1D"?.5:2);y0-=pad;y1+=pad;
  const fs=Math.max(10,Math.min(16,Hh/7.5)),PL=fs*((y1-y0)<40&&y1>=1000?4.6:3.6),PB=fs*1.5,PT=fs*.7,PR=6,cw=W-PL-PR,ch=Hh-PB-PT;
  const sx=x=>PL+(x-x0)/(x1-x0||1)*cw,sy=y=>PT+ch-(Math.min(Math.max(y,y0),y1)-y0)/(y1-y0||1)*ch;
  // range stats (exclude deposits from % change)
- const vmin=Math.min(...ys),vmax=Math.max(...ys),dsum=dep.reduce((a,d)=>a+d[1],0),chg=ys[ys.length-1]-ys[0]-dsum,pc=chg/ys[0]*100,up=chg>=0,col=up?"#2ef29a":"#ff4d6d";
+ const vmin=Math.min(...ys),vmax=Math.max(...ys),dsum=dep.reduce((a,d)=>a+d[1],0),chg=ys[ys.length-1]-ys[0]-dsum,pc=chg/(base||ys[0])*100,up=chg>=0,col=up?"#2ef29a":"#ff4d6d";
  $("eqi").innerHTML=`<span class="${up?'up':'dn'}">${up?"+":"−"}${Math.abs(pc).toFixed(2)}%</span> <span style="opacity:.8">H ${m(vmax)} L ${m(vmin)}</span>`;
  // smooth path (monotone-ish cardinal)
  const P=pts.map(p=>[sx(p[0]),sy(p[1])]);let d="M"+P[0][0].toFixed(1)+","+P[0][1].toFixed(1);
@@ -296,8 +297,10 @@ window.drawEq=function(){const sv=$("eq");if(!sv||!D)return;let pts=eqSel().slic
  // x labels
  const span=x1-x0,nx=Math.max(2,Math.min(6,Math.floor(cw/(fs*7))));for(let i=0;i<=nx;i++){const t=x0+span*i/nx,dt=new Date(t*1000),lab=span<=1.5*86400?dt.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}):dt.toLocaleDateString([],{month:"short",day:"numeric"});const x=sx(t);
   o+=`<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${PT}" y2="${PT+ch}" stroke="rgba(255,255,255,.04)"/><text x="${x.toFixed(1)}" y="${Hh-fs*.3}" fill="#8b93c7" font-size="${fs}" text-anchor="${i==0?'start':i==nx?'end':'middle'}">${lab}</text>`}
- // deposit dashed line
- if(base>y0&&base<y1)o+=`<line x1="${PL}" x2="${W-PR}" y1="${sy(base).toFixed(1)}" y2="${sy(base).toFixed(1)}" stroke="#ffc145" stroke-width="1" stroke-dasharray="5 4" opacity=".75"/><text x="${W-PR-2}" y="${(sy(base)-3).toFixed(1)}" fill="#ffc145" font-size="${fs*.85}" text-anchor="end" opacity=".85">deposit ${fmt(base)}</text>`;
+ // deposit step line (cumulative deposited as of each point)
+ if(base>0){let dd="";pts.forEach((p,i)=>{const v=depAt(p[0]);if(!(v>0))return;const x=sx(p[0]).toFixed(1),y=sy(v).toFixed(1);dd+=dd?(`H${x}V${y}`):`M${x},${y}`});dd+=`H${W-PR}`;
+  o+=`<path d="${dd}" fill="none" stroke="#ffc145" stroke-width="1" stroke-dasharray="5 4" opacity=".75"/>`;
+  if(base>=y0&&base<=y1)o+=`<text x="${W-PR-2}" y="${(sy(base)-3).toFixed(1)}" fill="#ffc145" font-size="${fs*.85}" text-anchor="end" opacity=".9">Deposited ${m(base).replace(/\.00$/,"")}</text>`}
  dep.forEach(q=>{const x=sx(q[0]);o+=`<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${PT}" y2="${PT+ch}" stroke="#ffc145" stroke-dasharray="3 4" opacity=".5"/>`});
  o+=`<path d="${d}L${P[P.length-1][0].toFixed(1)},${PT+ch}L${P[0][0].toFixed(1)},${PT+ch}Z" fill="url(#eqg)"/><path d="${d}" fill="none" stroke="${col}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>`;
  // trade markers
@@ -311,7 +314,7 @@ function hov(ev){if(!G)return;const sv=$("eq"),r=sv.getBoundingClientRect(),cx=(
  let b=G.pts[0];for(const p of G.pts)if(Math.abs(p[0]-t)<Math.abs(b[0]-t))b=p;const X1=G.sx(b[0]),Y1=G.sy(b[1]);const g=$("eqx");if(!g)return;g.style.display="";
  $("eqxl").setAttribute("x1",X1);$("eqxl").setAttribute("x2",X1);$("eqxc").setAttribute("cx",X1);$("eqxc").setAttribute("cy",Y1);
  const dt=new Date(b[0]*1000),txt=`${m(b[1])} · ${dt.toLocaleDateString([],{month:"short",day:"numeric"})} ${dt.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}`,tw=txt.length*G.fs*.56+10;
- let tx=X1+8;if(tx+tw>G.W-G.PR)tx=X1-8-tw;const ty=G.PT+2;const rr=$("eqxr");rr.setAttribute("x",tx);rr.setAttribute("y",ty);rr.setAttribute("width",tw);const tt=$("eqxt");tt.setAttribute("x",tx+5);tt.setAttribute("y",ty+G.fs*1.15);tt.textContent=txt}
+ let tx=X1+8;if(tx+tw>G.W-G.PR)tx=X1-8-tw;tx=Math.max(2,Math.min(tx,G.W-tw-2));const ty=G.PT+2;const rr=$("eqxr");rr.setAttribute("x",tx);rr.setAttribute("y",ty);rr.setAttribute("width",tw);const tt=$("eqxt");tt.setAttribute("x",tx+5);tt.setAttribute("y",ty+G.fs*1.15);tt.textContent=txt}
 const off=()=>{const g=$("eqx");if(g)g.style.display="none"};
 const sv=$("eq");sv.addEventListener("mousemove",hov);sv.addEventListener("mouseleave",off);sv.addEventListener("touchstart",hov,{passive:true});sv.addEventListener("touchmove",hov,{passive:true});sv.addEventListener("touchend",()=>setTimeout(off,2500));
 let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{try{drawEq()}catch(e){}},150)});
