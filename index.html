@@ -181,8 +181,11 @@ function hist(){const c=(X&&X.c)||[],strs=[...new Set(c.map(r=>r[1]).filter(Bool
 function rvFull(){const v=X&&X.rv;show(`<h2>Daily review</h2>`+(v&&v.h?`<p><b>${v.ti||""}</b></p><p style="margin-top:.5em">${v.t.split(" • ").join("<br>• ")}</p>${v.g?`<p class="sm" style="margin-top:.6em">Top gainers: ${v.g}</p>`:""}`:"<p>First review runs tonight at 8:47 PM CT.</p>"))}
 addEventListener("keydown",e=>{if(e.key==="Escape")cls()});
 function IVM(t){const p=new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",weekday:"short",hour:"numeric",hourCycle:"h23"}).formatToParts(t?new Date(t):new Date()),h=+p.find(x=>x.type=="hour").value%24,w=p.find(x=>x.type=="weekday").value;if(h>=22||h<6)return 30;if(w!="Sat"&&w!="Sun"&&h>=8&&h<15)return 10;return 15}
+const _CTF=new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",weekday:"short",hour:"numeric",minute:"numeric",hourCycle:"h23"});let _NRk=null,_NRv=0;
+function slotOK(t){const p=_CTF.formatToParts(new Date(t)),h=+p.find(x=>x.type=="hour").value%24,m=+p.find(x=>x.type=="minute").value,w=p.find(x=>x.type=="weekday").value;if(h>=22||h<6)return m==11||m==41;if(w!="Sat"&&w!="Sun"&&h>=8&&h<15)return m%10==5;return m==7||m==22||m==37||m==52}
+function nextRun(last){const L=new Date(last).getTime();if(_NRk===last)return _NRv;let t=Math.ceil((L+180e3)/60e3)*60e3;for(let i=0;i<120&&!slotOK(t);i++)t+=60e3;_NRk=last;_NRv=t+90e3;return _NRv}
 function tick(){if(!D)return;const IV=IVM()*60,age=(Date.now()-new Date(D.last))/1000,stale=age>Math.max(1800,IV*2+300);$("live").className="live "+(stale?"off":"on");$("lt").textContent=stale?"STALE":"LIVE";
- const s=IV-age,c=$("cd");if(s<=0){c.classList.add("due");const om=Math.floor(-s/60),t=om<1?"Scanning…":"Scanning… ("+om+"m)";if(c.textContent!==t)c.textContent=t;const rb=$("rfb");if(rb)rb.style.display=om>=6?"":"none";return}{const rb=$("rfb");if(rb)rb.style.display="none"}c.classList.remove("due");c.textContent=Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0")}
+ const s=(nextRun(D.last)-Date.now())/1000,c=$("cd");if(s<=0){c.classList.add("due");const om=Math.floor(-s/60),t=om<1?"Scanning…":"Scanning… ("+om+"m)";if(c.textContent!==t)c.textContent=t;const rb=$("rfb");if(rb)rb.style.display=om>=6?"":"none";return}{const rb=$("rfb");if(rb)rb.style.display="none"}c.classList.remove("due");c.textContent=Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0")}
 
 
 let HI=0,hm=[],seenA=new Set(),hfirst=true,peakSeen=0;
@@ -213,7 +216,7 @@ let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(fit,120)});
 if(window.ResizeObserver)new ResizeObserver(()=>{clearTimeout(rz);rz=setTimeout(fit,120)}).observe(document.body);
 poll(true);setInterval(()=>poll(),20000);
 /* watchdog: timers can be throttled/frozen on iOS; if overdue 3+ min after 0 with no new data, or no successful poll for 60s, refetch everything */
-let WD=0;setInterval(()=>{if(!D)return;const od=(Date.now()-new Date(D.last))/1000-IVM()*60;if(Date.now()-LASTOK>60000){PB=0;poll(true)}else if(od>180&&Date.now()-WD>60000){WD=Date.now();PB=0;poll(true)}},5000);setInterval(tick,1000);setInterval(charts,60000);setTimeout(()=>location.reload(),6*3600e3);
+let WD=0;setInterval(()=>{if(!D)return;const od=(Date.now()-nextRun(D.last))/1000;if(Date.now()-LASTOK>60000){PB=0;poll(true)}else if(od>180&&Date.now()-WD>60000){WD=Date.now();PB=0;poll(true)}},5000);setInterval(tick,1000);setInterval(charts,60000);setTimeout(()=>location.reload(),6*3600e3);
 </script><script>
 /* live price tick: display only; 10-min feed stays source of truth */
 (()=>{let delay=5000,last={};
@@ -340,7 +343,7 @@ if(D)try{drawEq()}catch(e){}})();
 </script>
 <script>
 /* self-update: compare to version.json (no-store); reload with cache-buster on change */
-const APP_V="202610271740";
+const APP_V="202610271751";
 (()=>{let busy=0;async function chk(){if(busy)return;busy=1;try{const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});if(r.ok){const v=(await r.json()).v;if(v&&v!==APP_V){const u=new URL(location.href);u.searchParams.set("v",v);location.replace(u.toString());return}}}catch(e){}busy=0}
 setInterval(chk,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()});addEventListener("pageshow",chk);setTimeout(chk,3000);
 if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{})})();
