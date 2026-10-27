@@ -108,7 +108,7 @@ const TOPIC="gt25754f4b7928dc2b4b9a442c2db53703",DATA="https://ntfy.sh/"+TOPIC+"
 let X=null,EQR="7D",OP=null,TF="1h",HF="All",D=null,seen=new Set(),first=true;const $=i=>document.getElementById(i);
 const m=v=>v==null?"—":"$"+Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 const sg=v=>v==null?"—":(v>=0?"+":"−")+m(Math.abs(v)).slice(0);const cl=v=>v>=0?"up":"dn";
-const fp=v=>v>=100?v.toFixed(2):v>=1?v.toFixed(3):v.toPrecision(4);
+const fp=v=>v==null||isNaN(v)?"—":(v=+v)>=100?v.toFixed(2):v>=1?v.toFixed(3):v.toPrecision(4);
 function line(pts,W,H,col,fill){if(pts.length<2)return"";const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys)||1;
  const sx=x=>(x-x0)/(x1-x0||1)*W,sy=y=>H-4-(y-y0)/((y1-y0)||1)*(H-8);const d=pts.map((p,i)=>(i?"L":"M")+sx(p[0]).toFixed(1)+","+sy(p[1]).toFixed(1)).join("");
  return (fill?`<path d="${d}L${W},${H}L0,${H}Z" fill="${col}" opacity=".15"/>`:"")+`<path d="${d}" fill="none" stroke="${col}" stroke-width="3" stroke-linejoin="round" class="drw"/>`}
@@ -119,7 +119,7 @@ function candles(c,W,H,lines){if(!c.length)return"";c=c.slice().sort((a,b)=>a[0]
 async function cb(sym,g){const r=await fetch(CB+sym+"/candles?granularity="+g,{cache:"no-store"});if(!r.ok)throw 0;return r.json()}
 async function charts(){if(!D)return;
  for(const p of D.pos){try{const c=(await cb(p.s,3600)).slice(0,48);const el=$("pc_"+p.s);if(el)el.innerHTML=candles(c,800,200,[{v:p.e,c:"#38d8ff",n:"ENTRY"},{v:p.st,c:"#ff4d6d",n:"STOP"}])}catch(e){}}
- for(const c of D.cand){try{const k=(await cb(c.s,3600)).slice(0,48).reverse();const el=$("sp_"+c.s);if(el){const up=k[k.length-1][4]>=k[0][4];el.innerHTML=line(k.map(x=>[x[0],x[4]]),160,40,up?"#2ef29a":"#ff4d6d")}}catch(e){}}
+ for(const c of (D.cand||[]).filter(c=>/-/.test(c.s)&&c.s.length>2)){try{const k=(await cb(c.s,3600)).slice(0,48).reverse();const el=$("sp_"+c.s);if(el){const up=k[k.length-1][4]>=k[0][4];el.innerHTML=line(k.map(x=>[x[0],x[4]]),160,40,up?"#2ef29a":"#ff4d6d")}}catch(e){}}
  try{let k=(await cb("BTC-USD",21600)).slice().reverse();const em=k.map((x,i)=>{if(i<199)return null;let t=0;for(let j=i-199;j<=i;j++)t+=k[j][4];return[x[0],t/200]});const n=Math.min(60,k.length-199);k=k.slice(-n);const em2=em.slice(-n);
   const all=k.map(x=>[x[0],x[4]]).concat(em2);const ys=all.map(p=>p[1]),y0=Math.min(...ys),y1=Math.max(...ys),x0=k[0][0],x1=k[k.length-1][0];
   const path=(pts,col)=>{const d=pts.map((p,i)=>(i?"L":"M")+((p[0]-x0)/(x1-x0)*800).toFixed(1)+","+(146-(p[1]-y0)/(y1-y0)*140).toFixed(1)).join("");return`<path d="${d}" fill="none" stroke="${col}" stroke-width="3"/>`};
@@ -130,9 +130,9 @@ function render(){const d=D;$("val").textContent=m(d.val);$("day").textContent=s
  $("pos").style.setProperty("--k",Math.max(1,(d.pos||[]).length/3));$("pos").innerHTML=d.pos.length?d.pos.map(p=>`<div class="pos" onclick="openPos('${p.s}')"><div class="pinfo"><div class="big">${p.s.replace("-USD","")} <span class="${cl(p.u)}">${sg(p.u)}</span></div><div class="sm"><span class="${cl(p.u)}">${p.pct>=0?"+":""}${p.pct}%</span> · bid ${fp(p.b)}</div><div class="sm">entry ${fp(p.e)} · stop ${fp(p.st)}</div></div><svg id="pc_${p.s}" viewBox="0 0 800 200" preserveAspectRatio="none"></svg></div>`).join(""):'<div class="big am">All cash — hunting</div>';
  const rg=d.rg;$("rgl").innerHTML=`BTC 6h · SMA200 · regime: <span class="${rg.buys?'up':'dn'}">${rg.l||""}</span> · breadth ${rg.br}%`;
  const bc=s=>/held/i.test(s)?"background:#1e5b42;color:#2ef29a":/pass|reject|block/i.test(s)?"background:#5b1e2c;color:#ff8da1":"background:#5b4a1e;color:#ffc145";
- $("cand").innerHTML=d.cand.map(c=>`<div class="cand"><b class="cn">${c.s.replace(/-USDC?$/,"")}</b><span class="cy">${c.sc}</span><span class="badge" style="${bc(c.st)}">${c.st}</span><svg id="sp_${c.s}" viewBox="0 0 160 40" preserveAspectRatio="none" style="height:clamp(20px,3.5vh,120px)"></svg><div style="grid-column:1/5;font-size:1vw;color:#aab2e6">${c.w}</div></div>`).join("");
+ $("cand").innerHTML=d.cand.map(c=>`<div class="cand"><b class="cn">${c.s.replace(/-USDC?$/,"")}</b><span class="cy">${c.sc??"—"}</span><span class="badge" style="${bc(c.st)}">${c.st}</span><svg id="sp_${c.s}" viewBox="0 0 160 40" preserveAspectRatio="none" style="height:clamp(20px,3.5vh,120px)"></svg><div style="grid-column:1/5;font-size:1vw;color:#aab2e6">${c.w}</div></div>`).join("");
  $("runs").innerHTML=d.runs.map(r=>{const k=r.t+r.a+r.r,n=!first&&!seen.has(k);seen.add(k);const c=/buy/i.test(r.a)?"up":/sell|stop/i.test(r.a)?"dn":"am";return`<div class="run ${n?'new':''}"><b class="cy">${r.t}</b> <b class="${c}">${r.a}</b><div>${r.r}</div></div>`}).join("");first=false;
- $("tr").innerHTML="<span class='lbl'>Recent trades</span> "+(d.tr.map(t=>`<span class="${t.a=='BUY'?'up':'dn'}"><b>${t.a}</b></span> ${t.s} @ ${fp(t.p)} (${m(t.n)}) ${t.t}`).join(" · ")||"none")+` · fixes: ${d.fx}`;try{extra()}catch(e){}charts();try{hype(d)}catch(e){}if(OP)try{drawPos()}catch(e){}setTimeout(fit,50)}
+ $("tr").innerHTML="<span class='lbl'>Recent trades</span> "+((d.tr||[]).filter(t=>t&&t.a&&t.p!=null).map(t=>`<span class="${t.a=='BUY'?'up':'dn'}"><b>${t.a}</b></span> ${t.s} @ ${fp(t.p)} (${m(t.n)}) ${t.t}`).join(" · ")||"none")+` · fixes: ${d.fx}`;try{extra()}catch(e){}charts();try{hype(d)}catch(e){}if(OP)try{drawPos()}catch(e){}setTimeout(fit,50)}
 async function poll(){try{let r=await fetch(DATA+"&_="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error(r.status);let ls=(await r.text()).trim().split("\n").filter(Boolean);
  if(!ls.length){r=await fetch(DATA1+"&_="+Date.now(),{cache:"no-store"});ls=(await r.text()).trim().split("\n").filter(Boolean)}
  let j=null,x=null;for(const l of ls){try{const o=JSON.parse(JSON.parse(l).message);if(o.k==="x")x=o;else j=o}catch(e){}}
