@@ -109,7 +109,7 @@ body{padding:clamp(4px,1.2vw,40px)}
   <div class="pnl"><span id="day">—</span> <span class="sm">today</span> &nbsp; <span id="week">—</span> <span class="sm">week</span></div></div>
   <div style="text-align:right"><div id="live" class="live off"><span class="dot"></span><span id="lt">CONNECTING</span></div>
   <div class="lbl" style="margin-top:.8vw">Next run</div><div class="cd cy" id="cd">--:--</div><div class="sm" id="last"></div></div></div>
- <div class="card chart"><div class="lbl">Account value <span class="tb" id="eqb"></span></div><svg id="eq" viewBox="0 0 800 170" preserveAspectRatio="none"></svg></div>
+ <div class="card chart"><div class="lbl">Account value <span class="tb" id="eqb"></span> <span id="eqi" class="sm" style="white-space:nowrap;font-weight:600;letter-spacing:0;text-transform:none"></span></div><svg id="eq" viewBox="0 0 800 170" preserveAspectRatio="none"></svg></div>
  <div class="card" id="poswrap"><div class="lbl">Open positions · 1h candles 48h · tap for detail</div><div id="pos"></div></div>
  <div class="card chart"><div class="lbl" id="rgl">BTC 6h · SMA200</div><svg id="btc" viewBox="0 0 800 150" preserveAspectRatio="none"></svg></div>
 </div>
@@ -144,7 +144,7 @@ async function charts(){if(!D)return;
   $("btc").innerHTML=path(k.map(x=>[x[0],x[4]]),"#ffc145")+path(em2,"#b388ff")+`<text x="8" y="22" fill="#ffc145" font-size="18" font-weight="700">BTC ${fp(k[k.length-1][4])}</text><text x="8" y="44" fill="#b388ff" font-size="18">6h SMA200 ${fp(em2[em2.length-1][1])} · ${k[k.length-1][4]>=em2[em2.length-1][1]?"above ✅":"below ⛔"}</text>`}catch(e){}}
 function render(){const d=D;$("val").textContent=m(d.val);$("day").textContent=sg(d.day);$("day").className=cl(d.day);$("week").textContent=sg(d.week);$("week").className=cl(d.week);
  $("last").textContent="Last run "+new Date(d.last).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})+" · cash "+m(d.cash)+" · "+(d.rg.n||"")+" coins";
- const eq=eqSel();$("eqb").innerHTML=["1D","7D","30D","All"].map(k=>`<button class="${k==EQR?'on':''}" onclick="EQR='${k}';render()">${k}</button>`).join("");$("eq").innerHTML=eq.length>1?line(eq,800,170,eq[eq.length-1][1]>=eq[0][1]?"#2ef29a":"#ff4d6d",true):'<text x="10" y="90" fill="#8b93c7" font-size="22">Building history…</text>';
+ const eq=eqSel();$("eqb").innerHTML=["1D","7D","30D","All"].map(k=>`<button class="${k==EQR?'on':''}" onclick="EQR='${k}';render()">${k}</button>`).join("");try{drawEq()}catch(e){console.warn(e)}
  $("pos").style.setProperty("--k",Math.max(1,Math.pow(((d.pos||[]).length>=5?Math.ceil((d.pos||[]).length/2):(d.pos||[]).length)/3,.8)));$("pos").innerHTML=d.pos.length?d.pos.map(p=>`<div class="pos" onclick="openPos('${p.s}')"><div class="pinfo"><div class="big">${p.s.replace("-USD","")} <span id="u_${p.s}" class="${cl(p.u)}">${sg(p.u)}</span></div><div class="sm"><span id="pp_${p.s}" class="${cl(p.u)}">${p.pct>=0?"+":""}${p.pct}%</span> · bid <span id="b_${p.s}">${fp(p.b)}</span></div><div class="sm">entry ${fp(p.e)} · stop ${fp(p.st)}</div></div><svg id="pc_${p.s}" viewBox="0 0 800 200" preserveAspectRatio="none"></svg></div>`).join(""):'<div class="big am">All cash — hunting</div>';
  const rg=d.rg;$("rgl").innerHTML=`BTC 6h · SMA200 · regime: <span class="${rg.buys?'up':'dn'}">${rg.l||""}</span> · breadth ${rg.br}%`;
  const bc=s=>/held/i.test(s)?"background:#1e5b42;color:#2ef29a":/pass|reject|block/i.test(s)?"background:#5b1e2c;color:#ff8da1":"background:#5b4a1e;color:#ffc145";
@@ -154,7 +154,7 @@ function render(){const d=D;$("val").textContent=m(d.val);$("day").textContent=s
 async function poll(){try{let r=await fetch(DATA+"&_="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error(r.status);let ls=(await r.text()).trim().split("\n").filter(Boolean);
  if(!ls.length){r=await fetch(DATA1+"&_="+Date.now(),{cache:"no-store"});ls=(await r.text()).trim().split("\n").filter(Boolean)}
  let j=null,x=null;for(const l of ls){try{const o=JSON.parse(JSON.parse(l).message);if(o.k==="x")x=o;else j=o}catch(e){}}
- const nx=x&&(!X||x.asof!==X.asof);if(nx)X=x;if(j&&(!D||j.asof!==D.asof)){D=j;render()}else if(nx&&D)render();$("err").textContent=""}catch(e){$("err").textContent="data retry… "+new Date().toLocaleTimeString()}}
+ const nx=x&&(!X||x.asof!==X.asof);if(j&&window.eqPrune)try{eqPrune(j)}catch(e){}if(nx)X=x;if(j&&(!D||j.asof!==D.asof)){D=j;render()}else if(nx&&D)render();$("err").textContent=""}catch(e){$("err").textContent="data retry… "+new Date().toLocaleTimeString()}}
 function eqSel(){const d=D,now=Date.now()/1000,a=(X&&X.ea)||[],w=(d.eq||[]);if(EQR=="1D")return w.filter(p=>p[0]>=now-86400);if(EQR=="7D")return w;
  const f=w.length?w[0][0]:1e12,m=a.filter(p=>p[0]<f).concat(w);return EQR=="30D"?m.filter(p=>p[0]>=now-30*86400):m}
 function px(s){return(X&&X.p||[]).find(q=>q.s===s)||{}}
@@ -220,9 +220,9 @@ async function tickPx(){try{if(!D||!D.pos||!D.pos.length||document.hidden)return
   if(eb){eb.textContent=fp(b);if(prev&&prev!==b)fl(eb,b>prev)}
   if(eu){eu.textContent=sg(u);eu.className=cl(u);if(prev&&prev!==b)fl(eu,b>prev)}
   if(window.onPx)onPx(p,b);if(ep){ep.textContent=(pct>=0?"+":"")+pct.toFixed(2)+"%";ep.className=cl(u)}}
- if(ok&&D.cash!=null){const v=D.cash+sum,ev=$("val"),dv=v-D.val;const pv=+ev.dataset.v||D.val;ev.textContent=m(v);ev.dataset.v=v;if(Math.abs(v-pv)>.005)fl(ev,v>pv);
+ if(ok&&D.cash!=null){const v=D.cash+sum;if(window.eqLive)try{eqLive(v)}catch(e){}{const ev=$("val"),dv=v-D.val;const pv=+ev.dataset.v||D.val;ev.textContent=m(v);ev.dataset.v=v;if(Math.abs(v-pv)>.005)fl(ev,v>pv);
   if(D.day!=null){const e=$("day");e.textContent=sg(D.day+dv);e.className=cl(D.day+dv)}
-  if(D.week!=null){const e=$("week");e.textContent=sg(D.week+dv);e.className=cl(D.week+dv)}}
+  if(D.week!=null){const e=$("week");e.textContent=sg(D.week+dv);e.className=cl(D.week+dv)}}}
  delay=ok?5000:Math.min(delay*2,60000)}catch(e){delay=Math.min(delay*2,60000)}}
 (async function loop(){await tickPx();setTimeout(loop,delay)})()})()
 </script><script>
@@ -259,5 +259,63 @@ async function movers(){let L=[];
  $$("mvi").innerHTML="🔥 Top movers 24h: "+L.map(x=>`<span><b>${x[0]}</b> <span class="${x[2]>=0?'up':'dn'}">${x[2]>=0?"+":""}${x[2].toFixed(1)}%</span></span>`).join("")}
 setTimeout(movers,1500);setInterval(movers,150000);
 })()
-</script></body></html>
+</script><script>
+/* equity chart: feed points + live 30s samples (localStorage, 48h), browser-only */
+(()=>{const K="eqlive_v1",H48=172800;let L=[];try{L=JSON.parse(localStorage.getItem(K)||"[]").filter(p=>Array.isArray(p)&&p.length==2)}catch(e){L=[]}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(L))}catch(e){}};
+window.eqLive=v=>{if(!(v>0))return;const t=Date.now()/1000,l=L[L.length-1];if(l&&t-l[0]<30)return;L.push([Math.round(t),+v.toFixed(2)]);L=L.filter(p=>p[0]>=t-H48);save();if(EQR=="1D"||EQR=="7D")try{drawEq()}catch(e){}};
+window.eqPrune=d=>{const w=d.eq||[];if(!w.length)return;const lt=w[w.length-1][0];/* feed refreshed: live samples up to the newest feed point are superseded */L=L.filter(p=>p[0]>lt);save()};
+const fmt=v=>"$"+(Math.abs(v)>=1e4?Math.round(v).toLocaleString():v.toLocaleString(undefined,{maximumFractionDigits:Math.abs(v)>=1000?0:2}));
+function tparse(str,ref){const mm=/(\d+):(\d+)\s*([AP]M)/i.exec(str||"");if(!mm)return null;let h=+mm[1]%12+(mm[3].toUpperCase()=="PM"?12:0);const r=new Date(ref*1000),d=new Date(r);d.setHours(h,+mm[2],0,0);let t=d/1000;if(t>ref+300)t-=86400;return t}
+let G=null;
+window.drawEq=function(){const sv=$("eq");if(!sv||!D)return;let pts=eqSel().slice();const now=Date.now()/1000,lo={"1D":now-86400,"7D":now-7*86400,"30D":now-30*86400}[EQR]||0;
+ const lf=pts.length?pts[pts.length-1][0]:0;pts=pts.concat(L.filter(p=>p[0]>lf&&p[0]>=lo)).sort((a,b)=>a[0]-b[0]);
+ const W=Math.max(200,sv.clientWidth|0),Hh=Math.max(60,sv.clientHeight|0);sv.setAttribute("viewBox",`0 0 ${W} ${Hh}`);
+ if(pts.length<2){sv.innerHTML=`<text x="10" y="${Hh/2}" fill="#8b93c7" font-size="14">Building history…</text>`;$("eqi").textContent="";return}
+ // deposits: step jumps >25% between consecutive points
+ const dep=[];for(let i=1;i<pts.length;i++){const a=pts[i-1][1],b=pts[i][1];if(a>0&&(b-a)/a>.25)dep.push([pts[i][0],b-a,i])}
+ const all=(X&&X.ea||[]).concat(D.eq||[]);let base=all.length?all[0][1]:pts[0][1];for(let i=1;i<all.length;i++){const a=all[i-1][1],b=all[i][1];if(a>0&&(b-a)/a>.25)base+=b-a}
+ 
+ // y-range: tight on 1D (or after deposit in-range use segment after last deposit)
+ let seg=pts;if(dep.length&&EQR=="1D"&&pts.length-dep[dep.length-1][2]>=2){seg=pts=pts.slice(dep[dep.length-1][2]);dep.length=0}
+ const ys=pts.map(p=>p[1]),x0=pts[0][0],x1=pts[pts.length-1][0];let y0=Math.min(...seg.map(p=>p[1])),y1=Math.max(...seg.map(p=>p[1]));if(EQR!="1D"){y0=Math.min(y0,base);y1=Math.max(y1,base)}
+ const pad=Math.max((y1-y0)*(EQR=="1D"?.12:.08),EQR=="1D"?.5:2);y0-=pad;y1+=pad;
+ const fs=Math.max(10,Math.min(16,Hh/7.5)),PL=fs*((y1-y0)<40&&y1>=1000?4.6:3.6),PB=fs*1.5,PT=fs*.7,PR=6,cw=W-PL-PR,ch=Hh-PB-PT;
+ const sx=x=>PL+(x-x0)/(x1-x0||1)*cw,sy=y=>PT+ch-(Math.min(Math.max(y,y0),y1)-y0)/(y1-y0||1)*ch;
+ // range stats (exclude deposits from % change)
+ const vmin=Math.min(...ys),vmax=Math.max(...ys),dsum=dep.reduce((a,d)=>a+d[1],0),chg=ys[ys.length-1]-ys[0]-dsum,pc=chg/ys[0]*100,up=chg>=0,col=up?"#2ef29a":"#ff4d6d";
+ $("eqi").innerHTML=`<span class="${up?'up':'dn'}">${up?"+":"−"}${Math.abs(pc).toFixed(2)}%</span> <span style="opacity:.8">H ${m(vmax)} L ${m(vmin)}</span>`;
+ // smooth path (monotone-ish cardinal)
+ const P=pts.map(p=>[sx(p[0]),sy(p[1])]);let d="M"+P[0][0].toFixed(1)+","+P[0][1].toFixed(1);
+ for(let i=0;i<P.length-1;i++){const a=P[i-1]||P[i],b=P[i],c=P[i+1],e=P[i+2]||c,t=.18;
+  let c1y=b[1]+(c[1]-a[1])*t,c2y=c[1]-(e[1]-b[1])*t;const mn=Math.min(b[1],c[1]),mx=Math.max(b[1],c[1]);c1y=Math.min(Math.max(c1y,mn),mx);c2y=Math.min(Math.max(c2y,mn),mx);
+  d+=`C${(b[0]+(c[0]-a[0])*t).toFixed(1)},${c1y.toFixed(1)} ${(c[0]-(e[0]-b[0])*t).toFixed(1)},${c2y.toFixed(1)} ${c[0].toFixed(1)},${c[1].toFixed(1)}`}
+ let o=`<defs><linearGradient id="eqg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".38"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>`;
+ // grid + y labels
+ const n=4;for(let i=0;i<=n;i++){const v=y0+(y1-y0)*i/n,y=sy(v);o+=`<line x1="${PL}" x2="${W-PR}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="rgba(255,255,255,.07)"/><text x="${PL-4}" y="${(y+fs*.35).toFixed(1)}" fill="#8b93c7" font-size="${fs}" text-anchor="end">${(y1-y0)<40?"$"+v.toFixed(2):fmt(v)}</text>`}
+ // x labels
+ const span=x1-x0,nx=Math.max(2,Math.min(6,Math.floor(cw/(fs*7))));for(let i=0;i<=nx;i++){const t=x0+span*i/nx,dt=new Date(t*1000),lab=span<=1.5*86400?dt.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}):dt.toLocaleDateString([],{month:"short",day:"numeric"});const x=sx(t);
+  o+=`<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${PT}" y2="${PT+ch}" stroke="rgba(255,255,255,.04)"/><text x="${x.toFixed(1)}" y="${Hh-fs*.3}" fill="#8b93c7" font-size="${fs}" text-anchor="${i==0?'start':i==nx?'end':'middle'}">${lab}</text>`}
+ // deposit dashed line
+ if(base>y0&&base<y1)o+=`<line x1="${PL}" x2="${W-PR}" y1="${sy(base).toFixed(1)}" y2="${sy(base).toFixed(1)}" stroke="#ffc145" stroke-width="1" stroke-dasharray="5 4" opacity=".75"/><text x="${W-PR-2}" y="${(sy(base)-3).toFixed(1)}" fill="#ffc145" font-size="${fs*.85}" text-anchor="end" opacity=".85">deposit ${fmt(base)}</text>`;
+ dep.forEach(q=>{const x=sx(q[0]);o+=`<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${PT}" y2="${PT+ch}" stroke="#ffc145" stroke-dasharray="3 4" opacity=".5"/>`});
+ o+=`<path d="${d}L${P[P.length-1][0].toFixed(1)},${PT+ch}L${P[0][0].toFixed(1)},${PT+ch}Z" fill="url(#eqg)"/><path d="${d}" fill="none" stroke="${col}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>`;
+ // trade markers
+ const at=t=>{let k=0;for(let i=0;i<pts.length;i++){if(pts[i][0]<=t)k=i;else break}const a=pts[k],b=pts[k+1];if(!b)return a[1];const f=(t-a[0])/(b[0]-a[0]||1);return a[1]+(b[1]-a[1])*Math.max(0,Math.min(1,f))};
+ const ref=D.last?new Date(D.last)/1000:now,tm=[];(D.tr||[]).forEach(t=>{if(!t||!t.a)return;const A=String(t.a).toUpperCase(),b=/BUY/.test(A),s2=/SELL/.test(A);if(!b&&!s2)return;const ts=tparse(t.t,ref);if(ts)tm.push([ts,b,(b?"BUY ":"SELL ")+(t.s||"")])});
+ (X&&X.c||[]).forEach(r=>{const ts=tparse(r&&r[4],ref);if(ts)tm.push([ts,false,"SELL "+(r[0]||"")])});
+ tm.forEach(q=>{if(q[0]<x0||q[0]>x1)return;const x=sx(q[0]),y=sy(at(q[0]));o+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(fs*.38).toFixed(1)}" fill="${q[1]?'#2ef29a':'#ff4d6d'}" stroke="#0b0f2a" stroke-width="1.5"><title>${q[2]}</title></circle>`});
+ const lp=P[P.length-1];o+=`<circle cx="${lp[0].toFixed(1)}" cy="${lp[1].toFixed(1)}" r="3.5" fill="${col}"/><g id="eqx" style="display:none;pointer-events:none"><line id="eqxl" y1="${PT}" y2="${PT+ch}" stroke="rgba(255,255,255,.45)" stroke-dasharray="2 3"/><circle id="eqxc" r="4" fill="#fff"/><rect id="eqxr" rx="4" height="${fs*1.6}" fill="rgba(11,15,42,.92)" stroke="rgba(255,255,255,.25)"/><text id="eqxt" fill="#e8ecff" font-size="${fs}" font-weight="700"></text></g>`;
+ sv.innerHTML=o;G={pts,sx,sy,W,PL,PR,PT,fs,x0,x1}};
+function hov(ev){if(!G)return;const sv=$("eq"),r=sv.getBoundingClientRect(),cx=(ev.touches?ev.touches[0].clientX:ev.clientX)-r.left;const x=cx/r.width*G.W;const t=G.x0+(x-G.PL)/(G.W-G.PL-G.PR)*(G.x1-G.x0);
+ let b=G.pts[0];for(const p of G.pts)if(Math.abs(p[0]-t)<Math.abs(b[0]-t))b=p;const X1=G.sx(b[0]),Y1=G.sy(b[1]);const g=$("eqx");if(!g)return;g.style.display="";
+ $("eqxl").setAttribute("x1",X1);$("eqxl").setAttribute("x2",X1);$("eqxc").setAttribute("cx",X1);$("eqxc").setAttribute("cy",Y1);
+ const dt=new Date(b[0]*1000),txt=`${m(b[1])} · ${dt.toLocaleDateString([],{month:"short",day:"numeric"})} ${dt.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}`,tw=txt.length*G.fs*.56+10;
+ let tx=X1+8;if(tx+tw>G.W-G.PR)tx=X1-8-tw;const ty=G.PT+2;const rr=$("eqxr");rr.setAttribute("x",tx);rr.setAttribute("y",ty);rr.setAttribute("width",tw);const tt=$("eqxt");tt.setAttribute("x",tx+5);tt.setAttribute("y",ty+G.fs*1.15);tt.textContent=txt}
+const off=()=>{const g=$("eqx");if(g)g.style.display="none"};
+const sv=$("eq");sv.addEventListener("mousemove",hov);sv.addEventListener("mouseleave",off);sv.addEventListener("touchstart",hov,{passive:true});sv.addEventListener("touchmove",hov,{passive:true});sv.addEventListener("touchend",()=>setTimeout(off,2500));
+let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{try{drawEq()}catch(e){}},150)});
+if(D)try{drawEq()}catch(e){}})();
+</script>
+</body></html>
 <script>(()=>{const o=new MutationObserver(m=>m.forEach(r=>{const e=r.target.nodeType==3?r.target.parentElement:r.target;if(e&&e.closest&&e.closest('.top')){e.classList.remove('flash');void e.offsetWidth;e.classList.add('flash')}}));addEventListener('load',()=>document.querySelectorAll('.top').forEach(t=>o.observe(t,{characterData:true,childList:true,subtree:true})))})()</script>
