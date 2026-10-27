@@ -139,7 +139,7 @@ function hist(){const c=(X&&X.c)||[],strs=[...new Set(c.map(r=>r[1]).filter(Bool
 function rvFull(){const v=X&&X.rv;show(`<h2>Daily review</h2>`+(v&&v.h?`<p><b>${v.ti||""}</b></p><p style="margin-top:.5em">${v.t.split(" • ").join("<br>• ")}</p>${v.g?`<p class="sm" style="margin-top:.6em">Top gainers: ${v.g}</p>`:""}`:"<p>First review runs tonight at 8:47 PM CT.</p>"))}
 addEventListener("keydown",e=>{if(e.key==="Escape")cls()});
 function tick(){if(!D)return;const age=(Date.now()-new Date(D.last))/1000,stale=age>720;$("live").className="live "+(stale?"off":"on");$("lt").textContent=stale?"STALE":"LIVE";
- let s=(new Date(D.next)-Date.now())/1000;if(s<0){s=300-((-s)%300)}if(s>295&&age>300){$("cd").textContent="RUNNING";return}$("cd").textContent=Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0")}
+ let s=(new Date(D.next)-Date.now())/1000;if(s<0){s=600-((-s)%600)}if(s>595&&age>600){$("cd").textContent="RUNNING";return}$("cd").textContent=Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0")}
 
 
 let HI=0,hm=[],seenA=new Set(),hfirst=true,peakSeen=0;
@@ -156,7 +156,7 @@ function hype(d){const M=[],runs=d.runs||[];let party=false;const nm=s=>(s||"").
  (d.pos||[]).forEach(p=>{if(p.pct>=10){M.push("🔥 "+nm(p.s)+" up "+p.pct+"% — letting it ride");if(!hfirst&&p.pct>=20)party=true}});
  if(d.val&&d.peak&&d.val>=d.peak&&d.val>peakSeen){if(peakSeen&&!hfirst)party=true;M.unshift("🏆 New account high: "+m(d.val)+"!")}if(d.val>peakSeen)peakSeen=d.val;
  if(d.rg&&d.rg.buys===false&&!halt)M.push("⏳ Patience pays. Cash is a position.");
- if(!(d.pos||[]).length&&!halt)M.push("🎯 Scanning every 5 minutes for the next setup");
+ if(!(d.pos||[]).length&&!halt)M.push("🎯 Scanning every 10 minutes for the next setup");
  M.push("💪 Discipline over emotion. Every trade has a stop.");
  hm=[...new Set(M)];if(party)confetti();if(hfirst){HI=0;showHype()}hfirst=false}
 function showHype(){if(!hm.length)return;const t=hm[HI++%hm.length];$("hype").innerHTML="<span>"+t+"</span>"}
