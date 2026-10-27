@@ -109,7 +109,7 @@ body{padding:clamp(4px,1.2vw,40px)}
  <div class="card top"><div><div class="lbl">Account value</div><div class="val" id="val">—</div>
   <div class="pnl"><span id="day">—</span> <span class="sm">today</span> &nbsp; <span id="week">—</span> <span class="sm">week</span></div></div>
   <div style="text-align:right"><div id="live" class="live off"><span class="dot"></span><span id="lt">CONNECTING</span></div>
-  <div class="lbl" style="margin-top:.8vw">Next run</div><div class="cd cy" id="cd">--:--</div><div class="sm" id="last"></div></div></div>
+  <div class="lbl" style="margin-top:.8vw">Next run</div><div class="cd cy" id="cd">--:--</div><button class="btn" id="rfb" style="display:none;margin:.3em 0" onclick="const u=new URL(location.href);u.searchParams.set('r',Date.now());location.replace(u)">↻ Tap to refresh</button><div class="sm" id="last"></div></div></div>
  <div class="card chart"><div class="lbl">Account value <span class="tb" id="eqb"></span> <span id="eqi" class="sm" style="white-space:nowrap;font-weight:600;letter-spacing:0;text-transform:none"></span></div><svg id="eq" viewBox="0 0 800 170" preserveAspectRatio="none"></svg></div>
  <div class="card" id="poswrap"><div class="lbl">Open positions · 1h candles 48h · tap for detail</div><div id="pos"></div></div>
  <div class="card chart"><div class="lbl" id="rgl">BTC 6h · SMA200</div><svg id="btc" viewBox="0 0 800 150" preserveAspectRatio="none"></svg></div>
@@ -152,10 +152,11 @@ function render(){const d=D;$("val").textContent=m(d.val);$("day").textContent=s
  $("cand").innerHTML=d.cand.map(c=>`<div class="cand"><b class="cn">${c.s.replace(/-USDC?$/,"")}</b><span class="cy">${c.sc??"—"}</span><span class="badge" style="${bc(c.st)}">${c.st}</span><svg id="sp_${c.s}" viewBox="0 0 160 40" preserveAspectRatio="none" style="height:clamp(20px,3.5vh,120px)"></svg><div style="grid-column:1/5;font-size:1vw;color:#aab2e6">${c.w}</div></div>`).join("");
  $("runs").innerHTML=d.runs.map(r=>{const k=r.t+r.a+r.r,n=!first&&!seen.has(k);seen.add(k);const c=/buy/i.test(r.a)?"up":/sell|stop/i.test(r.a)?"dn":"am";return`<div class="run ${n?'new':''}"><b class="cy">${r.t}</b> <b class="${c}">${r.a}</b><div>${r.r}</div></div>`}).join("");first=false;
  $("tr").innerHTML="<span class='lbl'>Recent trades</span> "+((d.tr||[]).filter(t=>t&&t.a&&t.p!=null).map(t=>`<span class="${t.a=='BUY'?'up':'dn'}"><b>${t.a}</b></span> ${t.s} @ ${fp(t.p)} (${m(t.n)}) ${t.t}`).join(" · ")||"none")+` · fixes: ${d.fx}`;try{extra()}catch(e){}charts();try{hype(d)}catch(e){}if(OP)try{drawPos()}catch(e){}setTimeout(fit,50)}
-async function poll(){try{let r=await fetch(DATA+"&_="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error(r.status);let ls=(await r.text()).trim().split("\n").filter(Boolean);
- if(!ls.length){r=await fetch(DATA1+"&_="+Date.now(),{cache:"no-store"});ls=(await r.text()).trim().split("\n").filter(Boolean)}
- let j=null,x=null;for(const l of ls){try{const o=JSON.parse(JSON.parse(l).message);if(o.k==="x")x=o;else j=o}catch(e){}}
- const nx=x&&(!X||x.asof!==X.asof);if(j&&window.eqPrune)try{eqPrune(j)}catch(e){}if(nx)X=x;if(j&&(!D||j.asof!==D.asof)){const was=D;D=j;render();if(was&&window.runDone)try{runDone(was,j)}catch(e){}}else if(nx&&D)render();$("err").textContent=""}catch(e){$("err").textContent="data retry… "+new Date().toLocaleTimeString()}}
+let LID=null,PB=0,LASTOK=0;const ft=(u,ms)=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);return fetch(u,{cache:"no-store",signal:c.signal}).finally(()=>clearTimeout(t))};
+async function poll(full){if(PB&&Date.now()-PB<20000)return;PB=Date.now();try{const since=(!full&&LID)?LID:"20m";let r=await ft("https://ntfy.sh/"+TOPIC+"/json?poll=1&since="+since+"&_="+Date.now(),15000);if(!r.ok)throw new Error(r.status);let ls=(await r.text()).trim().split("\n").filter(Boolean);
+ if(!ls.length&&!D){r=await ft(DATA1+"&_="+Date.now(),15000);ls=(await r.text()).trim().split("\n").filter(Boolean)}LASTOK=Date.now();
+ let j=null,x=null;for(const l of ls){try{const q=JSON.parse(l);if(q.id&&q.event!=="open")LID=q.id;const o=JSON.parse(q.message);if(o.k==="x")x=o;else j=o}catch(e){}}
+ const nx=x&&(!X||x.asof!==X.asof);if(j&&window.eqPrune)try{eqPrune(j)}catch(e){}if(nx)X=x;if(j&&(!D||j.asof!==D.asof)){const was=D;D=j;render();if(was&&window.runDone)try{runDone(was,j)}catch(e){}}else if(nx&&D)render();$("err").textContent=""}catch(e){$("err").textContent="data retry… "+new Date().toLocaleTimeString()}finally{PB=0}}
 function eqSel(){const d=D,now=Date.now()/1000,a=(X&&X.ea)||[],w=(d.eq||[]);if(EQR=="1D")return w.filter(p=>p[0]>=now-86400);if(EQR=="7D")return w;
  const f=w.length?w[0][0]:1e12,m=a.filter(p=>p[0]<f).concat(w);return EQR=="30D"?m.filter(p=>p[0]>=now-30*86400):m}
 function px(s){return(X&&X.p||[]).find(q=>q.s===s)||{}}
@@ -177,7 +178,7 @@ function hist(){const c=(X&&X.c)||[],strs=[...new Set(c.map(r=>r[1]).filter(Bool
 function rvFull(){const v=X&&X.rv;show(`<h2>Daily review</h2>`+(v&&v.h?`<p><b>${v.ti||""}</b></p><p style="margin-top:.5em">${v.t.split(" • ").join("<br>• ")}</p>${v.g?`<p class="sm" style="margin-top:.6em">Top gainers: ${v.g}</p>`:""}`:"<p>First review runs tonight at 8:47 PM CT.</p>"))}
 addEventListener("keydown",e=>{if(e.key==="Escape")cls()});
 function tick(){if(!D)return;const age=(Date.now()-new Date(D.last))/1000,stale=age>1800;$("live").className="live "+(stale?"off":"on");$("lt").textContent=stale?"STALE":"LIVE";
- const s=600-age,c=$("cd");if(s<=0){c.classList.add("due");const om=Math.floor(-s/60),t=om<1?"Scanning…":"Scanning… ("+om+"m)";if(c.textContent!==t)c.textContent=t;return}c.classList.remove("due");c.textContent=Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0")}
+ const s=600-age,c=$("cd");if(s<=0){c.classList.add("due");const om=Math.floor(-s/60),t=om<1?"Scanning…":"Scanning… ("+om+"m)";if(c.textContent!==t)c.textContent=t;const rb=$("rfb");if(rb)rb.style.display=om>=6?"":"none";return}{const rb=$("rfb");if(rb)rb.style.display="none"}c.classList.remove("due");c.textContent=Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0")}
 
 
 let HI=0,hm=[],seenA=new Set(),hfirst=true,peakSeen=0;
@@ -206,7 +207,9 @@ function fit(){const st=$("stage");st.style.transform="";st.style.width=st.style
  const k=Math.min(W/Math.max(sw,W+ow),H/Math.max(sh,H+oh),1);if(k<.999){st.style.width=W/k+"px";st.style.height=H/k+"px";st.style.transform="scale("+k+")"}}
 let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(fit,120)});addEventListener("orientationchange",()=>setTimeout(fit,300));
 if(window.ResizeObserver)new ResizeObserver(()=>{clearTimeout(rz);rz=setTimeout(fit,120)}).observe(document.body);
-poll();setInterval(poll,30000);setInterval(tick,1000);setInterval(charts,60000);setTimeout(()=>location.reload(),6*3600e3);
+poll(true);setInterval(()=>poll(),20000);
+/* watchdog: timers can be throttled/frozen on iOS; if overdue 3+ min after 0 with no new data, or no successful poll for 60s, refetch everything */
+let WD=0;setInterval(()=>{if(!D)return;const od=(Date.now()-new Date(D.last))/1000-600;if(Date.now()-LASTOK>60000){PB=0;poll(true)}else if(od>180&&Date.now()-WD>60000){WD=Date.now();PB=0;poll(true)}},5000);setInterval(tick,1000);setInterval(charts,60000);setTimeout(()=>location.reload(),6*3600e3);
 </script><script>
 /* live price tick: display only; 10-min feed stays source of truth */
 (()=>{let delay=5000,last={};
@@ -323,7 +326,7 @@ if(D)try{drawEq()}catch(e){}})();
 </script>
 <script>
 /* self-update: compare to version.json (no-store); reload with cache-buster on change */
-const APP_V="202610271128";
+const APP_V="202610271151";
 (()=>{let busy=0;async function chk(){if(busy)return;busy=1;try{const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});if(r.ok){const v=(await r.json()).v;if(v&&v!==APP_V){const u=new URL(location.href);u.searchParams.set("v",v);location.replace(u.toString());return}}}catch(e){}busy=0}
 setInterval(chk,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()});addEventListener("pageshow",chk);setTimeout(chk,3000);
 if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{})})();
@@ -335,7 +338,7 @@ const t=document.createElement("div");t.id="rtoast";document.body.appendChild(t)
 window.runDone=(a,b)=>{const c=$("cd");if(c){c.classList.remove("due","cdflash");void c.offsetWidth;c.classList.add("cdflash")}try{tick()}catch(e){}
  const dv=(b.val!=null&&a.val!=null)?b.val-a.val:null,tm=new Date(b.last).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
  t.innerHTML=`✅ Run finished ${tm} · ${m(b.val)}${dv!=null?` <span class="${cl(dv)}">${sg(dv)}</span>`:""}`;t.classList.add("on");clearTimeout(h);h=setTimeout(()=>t.classList.remove("on"),12000)};
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)poll()});addEventListener("pageshow",()=>poll());addEventListener("focus",()=>poll())})();
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){PB=0;poll(true)}});addEventListener("pageshow",()=>{PB=0;poll(true)});addEventListener("focus",()=>{PB=0;poll(true)})})();
 </script>
 </body></html>
 <script>(()=>{const o=new MutationObserver(m=>m.forEach(r=>{const e=r.target.nodeType==3?r.target.parentElement:r.target;if(e&&e.closest&&e.closest('.top')){e.classList.remove('flash');void e.offsetWidth;e.classList.add('flash')}}));addEventListener('load',()=>document.querySelectorAll('.top').forEach(t=>o.observe(t,{characterData:true,childList:true,subtree:true})))})()</script>
