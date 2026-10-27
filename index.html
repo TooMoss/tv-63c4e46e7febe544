@@ -76,7 +76,7 @@ svg{display:block}.sv svg{position:absolute;inset:0;width:100%;height:100%}
 .new{animation:ni 1.6s ease-out}@keyframes ni{0%{transform:translateX(-20%);opacity:0;background:rgba(56,216,255,.3)}}
 #tr{flex:none;font-size:clamp(9px,min(1vw,1.8vh),48px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 #rvw{font-size:clamp(10px,min(1vw,1.8vh),48px);color:#aab2e6;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
-#phn{display:none}
+#phn{display:none}svg{touch-action:pan-y}#ovb{overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 .err{position:fixed;bottom:.4vw;right:1vw;font-size:clamp(9px,.9vw,40px);color:#ff9b9b}
 /* overlay */
 #ov{position:fixed;inset:0;background:rgba(3,4,10,.8);backdrop-filter:blur(4px);z-index:20;display:none;align-items:center;justify-content:center;padding:2vmin}
@@ -98,7 +98,11 @@ svg{display:block}.sv svg{position:absolute;inset:0;width:100%;height:100%}
  #hype{font-size:13px;white-space:normal}
  .chart{flex:1 1 0;min-height:70px}#poswrap{flex:2.6 1 0}
  .sym{font-size:15px}.pu2{font-size:12px}.pl{font-size:9px}
- #btcw,#cw,#fw,#rw,#tr{display:none}.feed{display:none}
+ html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
+ #stage{transform:none!important;height:auto!important;width:100%!important}
+ .g{height:auto;grid-template-rows:auto auto}.col{overflow:visible}
+ #hdr{flex:none}.chart{flex:none;height:26vh}#poswrap{flex:none;height:auto}#pos{grid-auto-rows:34vh}
+ .feed{flex:none}#runs{max-height:50vh;overflow-y:auto}#tr{white-space:normal}#rvw{-webkit-line-clamp:6}
  .col:last-child{flex:none;overflow:visible}
  #last{display:none}.ring{width:60px}.right{flex-direction:column-reverse;gap:4px;align-items:center}.slots i{width:6px}.val{font-size:30px}.tile{padding:3px 4px}.tile .v{font-size:12px}.tile .k{font-size:8px}
  .ph{flex-wrap:wrap;row-gap:0}.pu2{margin-left:0;width:100%}.pl{font-size:8.5px}.pl span:nth-child(2){display:none}
@@ -252,7 +256,8 @@ function hype(d){const M=[],runs=d.runs||[];let party=false;
  hm=[...new Set(M)];if(party)confetti();if(hfirst){HI=0;showHype()}hfirst=false}
 function showHype(){if(!hm.length)return;const t=hm[HI++%hm.length];$("hype").innerHTML="<span>"+t+"</span>"}
 setInterval(showHype,15000);
-function fit(){const st=$("stage");st.style.transform="";st.style.width=st.style.height="";
+function narrow(){return innerWidth<=820&&innerHeight>innerWidth}
+function fit(){const st=$("stage");st.style.transform="";st.style.width=st.style.height="";if(narrow())return;
  const W=st.clientWidth,H=st.clientHeight,sw=st.scrollWidth,sh=st.scrollHeight;let ow=0,oh=0;
  st.querySelectorAll(".col,.col>.card:not(.feed):not(#hype):not(#cw):not(#rw):not(#tr),.pc").forEach(c=>{ow=Math.max(ow,c.scrollWidth-c.clientWidth);oh=Math.max(oh,c.scrollHeight-c.clientHeight)});
  const k=Math.min(W/Math.max(sw,W+ow),H/Math.max(sh,H+oh),1);if(k<.999){st.style.width=W/k+"px";st.style.height=H/k+"px";st.style.transform="scale("+k+")"}}
