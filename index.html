@@ -102,6 +102,7 @@ body{padding:clamp(4px,1.2vw,40px)}
 @media (min-width:821px) and (orientation:landscape) and (hover:hover){#pos.dense{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:minmax(0,1fr);gap:.5vh .6vw}#pos.dense .pinfo{flex:0 0 46%}body:has(#pos.dense) #poswrap{flex:3.4 1 0}body:has(#pos.dense) .chart{min-height:0}}
 .top>*{min-width:0}#pos .pos>svg{min-width:0;flex:1 1 0}
 .g>.col,.col>.card{min-width:0;max-width:100%}#strip{max-width:100%}
+.cd.due{font-size:clamp(14px,min(1.8vw,3.2vh),90px)!important;animation:duep 2.4s ease-in-out infinite;white-space:nowrap}@keyframes duep{50%{opacity:.45;text-shadow:0 0 22px rgba(56,216,255,.9)}}
 </style></head><body><div id="stage"><div class="g">
 <div class="col">
  <div class="card top"><div><div class="lbl">Account value</div><div class="val" id="val">—</div>
@@ -174,8 +175,8 @@ function hist(){const c=(X&&X.c)||[],strs=[...new Set(c.map(r=>r[1]).filter(Bool
  ${f.length?`<table class="ht"><tr><th>Closed</th><th>Coin</th><th>Strategy</th><th>P&L</th><th>%</th></tr>${f.slice().reverse().map(r=>`<tr><td>${r[4]||""}</td><td>${r[0]}</td><td>${r[1]||""}</td><td class="${cl(r[2])}">${sg(r[2])}</td><td class="${cl(r[2])}">${r[3]==null?"":r[3]+"%"}</td></tr>`).join("")}</table>`:'<p class="sm" style="margin-top:.8em">No closed trades yet. They appear here once a position is sold.</p>'}`)}
 function rvFull(){const v=X&&X.rv;show(`<h2>Daily review</h2>`+(v&&v.h?`<p><b>${v.ti||""}</b></p><p style="margin-top:.5em">${v.t.split(" • ").join("<br>• ")}</p>${v.g?`<p class="sm" style="margin-top:.6em">Top gainers: ${v.g}</p>`:""}`:"<p>First review runs tonight at 8:47 PM CT.</p>"))}
 addEventListener("keydown",e=>{if(e.key==="Escape")cls()});
-function tick(){if(!D)return;const age=(Date.now()-new Date(D.last))/1000,stale=age>720;$("live").className="live "+(stale?"off":"on");$("lt").textContent=stale?"STALE":"LIVE";
- let s=(new Date(D.next)-Date.now())/1000;if(s<0){s=600-((-s)%600)}if(s>595&&age>600){$("cd").textContent="RUNNING";return}$("cd").textContent=Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0")}
+function tick(){if(!D)return;const age=(Date.now()-new Date(D.last))/1000,stale=age>1800;$("live").className="live "+(stale?"off":"on");$("lt").textContent=stale?"STALE":"LIVE";
+ const s=600-age,c=$("cd");if(s<=0){if(!c.classList.contains("due")){c.classList.add("due");c.textContent="Run due any moment"}return}c.classList.remove("due");c.textContent=Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0")}
 
 
 let HI=0,hm=[],seenA=new Set(),hfirst=true,peakSeen=0;
