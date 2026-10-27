@@ -278,7 +278,7 @@ setTimeout(movers,1500);setInterval(movers,90000);
 })()
 </script><script>
 /* equity chart: feed points + live 30s samples (localStorage, 48h), browser-only */
-(()=>{const K="eqlive_v2";try{localStorage.removeItem("eqlive_v1")}catch(_){}const K0=0,H48=172800;let L=[];try{L=JSON.parse(localStorage.getItem(K)||"[]").filter(p=>Array.isArray(p)&&p.length==2)}catch(e){L=[]}
+(()=>{const K="eqlive_v3";try{localStorage.removeItem("eqlive_v1");localStorage.removeItem("eqlive_v2")}catch(_){}const K0=0,H48=172800;let L=[];try{L=JSON.parse(localStorage.getItem(K)||"[]").filter(p=>Array.isArray(p)&&p.length==2)}catch(e){L=[]}
 const save=()=>{try{localStorage.setItem(K,JSON.stringify(L))}catch(e){}};
 window.eqLive=v=>{if(!(v>0))return;const t=Date.now()/1000,l=L[L.length-1];if(l&&t-l[0]<30)return;L.push([Math.round(t),+v.toFixed(2)]);L=L.filter(p=>p[0]>=t-H48);save();if(EQR=="1D"||EQR=="7D")try{drawEq()}catch(e){}};
 window.eqPrune=d=>{const w=d.eq||[];if(!w.length)return;const lt=w[w.length-1][0];/* feed refreshed: live samples up to the newest feed point are superseded */const fv=+d.val||w[w.length-1][1];L=L.filter(p=>p[0]>lt&&(!fv||Math.abs(p[1]/fv-1)<.05));save()};
@@ -339,7 +339,7 @@ if(D)try{drawEq()}catch(e){}})();
 </script>
 <script>
 /* self-update: compare to version.json (no-store); reload with cache-buster on change */
-const APP_V="202610271224";
+const APP_V="202610271240";
 (()=>{let busy=0;async function chk(){if(busy)return;busy=1;try{const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});if(r.ok){const v=(await r.json()).v;if(v&&v!==APP_V){const u=new URL(location.href);u.searchParams.set("v",v);location.replace(u.toString());return}}}catch(e){}busy=0}
 setInterval(chk,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()});addEventListener("pageshow",chk);setTimeout(chk,3000);
 if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{})})();
