@@ -91,10 +91,10 @@ body{padding:clamp(4px,1.2vw,40px)}
 .pos{position:relative}.sb{position:absolute;left:0;right:0;bottom:1px;height:3px;border-radius:3px;background:rgba(255,255,255,.07);overflow:visible;pointer-events:none}
 .sb i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:linear-gradient(90deg,#ff4d6d,#ffc145 45%,#2ef29a);transition:width .6s ease}
 .sb b{position:absolute;top:-2px;width:7px;height:7px;border-radius:50%;background:#fff;box-shadow:0 0 8px #38d8ff;transform:translateX(-50%);transition:left .6s ease}
-.sb em{position:absolute;right:0;top:-1.25em;font-size:10px;font-style:normal;color:#8b93c7;opacity:.85}
+.sb em{position:absolute;right:0;top:-1.3em;font-size:10px;font-style:normal;color:#8b93c7;opacity:.9;background:rgba(7,10,28,.8);padding:0 3px;border-radius:3px;white-space:nowrap;z-index:2}#pos.dense .sb em{display:none}.val.tku{animation:sh 8s ease infinite,vu .8s ease}.val.tkd{animation:sh 8s ease infinite,vd .8s ease}@keyframes vu{0%{filter:drop-shadow(0 0 14px #2ef29a)}}@keyframes vd{0%{filter:drop-shadow(0 0 14px #ff4d6d)}}@media(min-width:1000px){#cand .cand:nth-child(n+3){display:none}}
 #strip{display:flex;flex-direction:row!important;align-items:center;gap:10px;height:26px;padding:0 10px!important;font-size:12px;white-space:nowrap;overflow:hidden;flex:none!important}
 #fng{flex:none;display:flex;align-items:center;gap:6px;font-weight:700}#fng .gg{width:46px;height:6px;border-radius:3px;background:linear-gradient(90deg,#ff4d6d,#ffc145,#2ef29a);position:relative}#fng .gg b{position:absolute;top:-3px;width:3px;height:12px;background:#fff;border-radius:2px;box-shadow:0 0 6px #fff}
-#mv{flex:1 1 0;width:0;min-width:0;overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}#mvi{display:inline-block;animation:mq 40s linear infinite;padding-left:15%}#mvi span{margin-right:16px}@keyframes mq{to{transform:translateX(-100%)}}
+#mv{flex:1 1 0;width:0;min-width:0;overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}#mvi{display:inline-block;animation:mq 40s linear infinite;padding-left:15%}#mvi span{margin-right:16px}@keyframes mq{to{transform:translateX(-100%)}}
 #btcx{font-weight:700;display:flex;justify-content:flex-end;align-items:center;gap:5px;padding-right:2.6em}#btcx i{width:8px;height:8px;border-radius:50%;display:inline-block}
 #mute{position:absolute;left:8px;bottom:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:#e8ecff;border-radius:8px;font-size:13px;padding:1px 6px;cursor:pointer;z-index:3}
 .win{animation:win 1.6s ease}@keyframes win{0%,40%{box-shadow:0 0 0 2px #2ef29a,0 0 30px rgba(46,242,154,.7)}}
@@ -104,6 +104,8 @@ body{padding:clamp(4px,1.2vw,40px)}
 .top>*{min-width:0}#pos .pos>svg{min-width:0;flex:1 1 0}
 .g>.col,.col>.card{min-width:0;max-width:100%}#strip{max-width:100%}
 .cd.due{font-size:clamp(14px,min(1.8vw,3.2vh),90px)!important;animation:duep 2.4s ease-in-out infinite;white-space:nowrap}@keyframes duep{50%{opacity:.45;text-shadow:0 0 22px rgba(56,216,255,.9)}}
+#poswrap>.lbl{display:flex;align-items:center;gap:8px;white-space:nowrap;overflow:hidden}#wl{margin-left:auto;display:flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0;font-weight:700;color:#dfe3ff;overflow:hidden;text-overflow:ellipsis}#wl .w{color:#2ef29a}#wl .l{color:#ff4d6d}#wl .dots{display:inline-flex;gap:1px}#wl .dots i{width:6px;height:6px;border-radius:50%;display:inline-block}#wl .mut{color:#8b93c7;font-weight:600}#pe{flex-shrink:0;text-transform:none;letter-spacing:0;color:#ffc145;font-weight:700}#pe:empty{display:none}#wl,#pe{font-size:.92em}@media(max-width:700px){#poswrap>.lbl{flex-wrap:wrap;row-gap:2px}#wl{order:3;margin-left:0;width:100%;flex-wrap:wrap}#pe{margin-left:auto}}
+#hd .sm,#day,#week{white-space:nowrap}.dsh{display:none}#pos.dense .bd{display:none}#pos.dense .dsh{display:inline}.st{color:#ff8fa3}
 </style></head><body><div id="stage"><div class="g">
 <div class="col">
  <div class="card top"><div><div class="lbl">Account value</div><div class="val" id="val">—</div>
@@ -111,7 +113,7 @@ body{padding:clamp(4px,1.2vw,40px)}
   <div style="text-align:right"><div id="live" class="live off"><span class="dot"></span><span id="lt">CONNECTING</span></div>
   <div class="lbl" style="margin-top:.8vw">Next run</div><div class="cd cy" id="cd">--:--</div><button class="btn" id="rfb" style="display:none;margin:.3em 0" onclick="const u=new URL(location.href);u.searchParams.set('r',Date.now());location.replace(u)">↻ Tap to refresh</button><div class="sm" id="last"></div></div></div>
  <div class="card chart"><div class="lbl">Account value <span class="tb" id="eqb"></span> <span id="eqi" class="sm" style="white-space:nowrap;font-weight:600;letter-spacing:0;text-transform:none"></span></div><svg id="eq" viewBox="0 0 800 170" preserveAspectRatio="none"></svg></div>
- <div class="card" id="poswrap"><div class="lbl">Open positions · 1h candles 48h · tap for detail</div><div id="pos"></div></div>
+ <div class="card" id="poswrap"><div class="lbl">Open positions <span id="wl"></span><span id="pe"></span></div><div id="pos"></div></div>
  <div class="card chart"><div class="lbl" id="rgl">BTC 6h · SMA200</div><svg id="btc" viewBox="0 0 800 150" preserveAspectRatio="none"></svg></div>
 </div>
 <div class="col">
@@ -134,7 +136,8 @@ function line(pts,W,H,col,fill){if(pts.length<2)return"";const xs=pts.map(p=>p[0
 function candles(c,W,H,lines){if(!c.length)return"";c=c.slice().sort((a,b)=>a[0]-b[0]);let lo=Math.min(...c.map(k=>k[1])),hi=Math.max(...c.map(k=>k[2]));lines.forEach(l=>{lo=Math.min(lo,l.v);hi=Math.max(hi,l.v)});
  const pad=(hi-lo)*.05;lo-=pad;hi+=pad;const sy=y=>H-(y-lo)/(hi-lo)*H,w=W/c.length;let s="";
  c.forEach((k,i)=>{const[t,l,h,o,cl]=k,up=cl>=o,col=up?"#2ef29a":"#ff4d6d",x=i*w+w/2;s+=`<line x1="${x}" x2="${x}" y1="${sy(h)}" y2="${sy(l)}" stroke="${col}"/><rect x="${x-w*.35}" width="${w*.7}" y="${sy(Math.max(o,cl))}" height="${Math.max(1,Math.abs(sy(o)-sy(cl)))}" fill="${col}"/>`});
- lines.forEach(l=>s+=`<line x1="0" x2="${W}" y1="${sy(l.v)}" y2="${sy(l.v)}" stroke="${l.c}" stroke-width="2" stroke-dasharray="8 6"/><text x="${W-4}" y="${sy(l.v)-5}" fill="${l.c}" font-size="18" text-anchor="end" font-weight="700">${l.n} ${fp(l.v)}</text>`);return s}
+ const ly=lines.map(l=>({l,y:sy(l.v)-5})).sort((a,b)=>a.y-b.y);for(let i=1;i<ly.length;i++)if(ly[i].y-ly[i-1].y<19)ly[i].y=ly[i-1].y+19;for(let i=ly.length-1;i>=0;i--){const mx=i===ly.length-1?H-3:ly[i+1].y-19;if(ly[i].y>mx)ly[i].y=mx}ly.forEach(o=>{if(o.y<16)o.y=16});
+ lines.forEach(l=>s+=`<line x1="0" x2="${W}" y1="${sy(l.v)}" y2="${sy(l.v)}" stroke="${l.c}" stroke-width="2" stroke-dasharray="8 6"/>`);ly.forEach(({l,y})=>s+=`<text x="${W-4}" y="${y}" fill="${l.c}" font-size="18" text-anchor="end" font-weight="700" paint-order="stroke" stroke="#070a1c" stroke-width="4">${l.n} ${fp(l.v)}</text>`);return s}
 async function cb(sym,g){const r=await fetch(CB+sym.replace(/-USDC$/,"-USD")+"/candles?granularity="+g,{cache:"no-store"});if(!r.ok)throw 0;return r.json()}
 async function charts(){if(!D)return;
  for(const p of D.pos){try{const c=(await cb(p.s,3600)).slice(0,48);const el=$("pc_"+p.s);if(el)el.innerHTML=candles(c,800,200,[{v:p.e,c:"#38d8ff",n:"ENTRY"},{v:p.st,c:"#ff4d6d",n:"STOP"}])}catch(e){}}
@@ -146,12 +149,12 @@ async function charts(){if(!D)return;
 function render(){const d=D;$("val").textContent=m(d.val);$("day").textContent=sg(d.day);$("day").className=cl(d.day);$("week").textContent=sg(d.week);$("week").className=cl(d.week);
  $("last").textContent="Last run "+new Date(d.last).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})+" · cash "+m(d.cash)+" · "+(d.rg.n||"")+" coins";
  const eq=eqSel();$("eqb").innerHTML=["1D","7D","30D","All"].map(k=>`<button class="${k==EQR?'on':''}" onclick="EQR='${k}';render()">${k}</button>`).join("");try{drawEq()}catch(e){console.warn(e)}
- $("pos").style.setProperty("--k",Math.max(1,Math.pow(((d.pos||[]).length>=5?Math.ceil((d.pos||[]).length/2):(d.pos||[]).length)/3,.8)));$("pos").innerHTML=d.pos.length?d.pos.map(p=>`<div class="pos" onclick="openPos('${p.s}')"><div class="pinfo"><div class="big">${p.s.replace("-USD","")} <span id="u_${p.s}" class="${cl(p.u)}">${sg(p.u)}</span></div><div class="sm"><span class="pv"><i>Value</i> <span id="v_${p.s}">${m((p.q||0)*(p.b||0))}</span></span> · <span id="pp_${p.s}" class="${cl(p.u)}">${p.pct>=0?"+":""}${p.pct}%</span> · bid <span id="b_${p.s}">${fp(p.b)}</span></div><div class="sm">entry ${fp(p.e)} · stop ${fp(p.st)}</div></div><svg id="pc_${p.s}" viewBox="0 0 800 200" preserveAspectRatio="none"></svg></div>`).join(""):'<div class="big am">All cash — hunting</div>';
+ $("pos").style.setProperty("--k",Math.max(1,Math.pow(((d.pos||[]).length>=5?Math.ceil((d.pos||[]).length/2):(d.pos||[]).length)/3,.8)));$("pos").innerHTML=d.pos.length?d.pos.map(p=>`<div class="pos" onclick="openPos('${p.s}')"><div class="pinfo"><div class="big">${p.s.replace("-USD","")} <span id="u_${p.s}" class="${cl(p.u)}">${sg(p.u)}</span></div><div class="sm"><span class="pv"><i>Value</i> <span id="v_${p.s}">${m((p.q||0)*(p.b||0))}</span></span> · <span id="pp_${p.s}" class="${cl(p.u)}">${p.pct>=0?"+":""}${p.pct}%</span><span class="bd"> · bid <span id="b_${p.s}">${fp(p.b)}</span></span></div><div class="sm"><span class="bd">entry</span><span class="dsh">in</span> ${fp(p.e)} · <span class="st">stop ${fp(p.st)}</span></div></div><svg id="pc_${p.s}" viewBox="0 0 800 200" preserveAspectRatio="none"></svg></div>`).join(""):'<div class="big am">All cash — hunting</div>';
  const rg=d.rg;$("rgl").innerHTML=`BTC 6h · SMA200 · regime: <span class="${rg.buys?'up':'dn'}">${rg.l||""}</span> · breadth ${rg.br}%`;
  const bc=s=>/held/i.test(s)?"background:#1e5b42;color:#2ef29a":/pass|reject|block/i.test(s)?"background:#5b1e2c;color:#ff8da1":"background:#5b4a1e;color:#ffc145";
  $("cand").innerHTML=d.cand.map(c=>`<div class="cand"><b class="cn">${c.s.replace(/-USDC?$/,"")}</b><span class="cy">${c.sc??"—"}</span><span class="badge" style="${bc(c.st)}">${c.st}</span><svg id="sp_${c.s}" viewBox="0 0 160 40" preserveAspectRatio="none" style="height:clamp(20px,3.5vh,120px)"></svg><div style="grid-column:1/5;font-size:1vw;color:#aab2e6">${c.w}</div></div>`).join("");
  $("runs").innerHTML=d.runs.map(r=>{const k=r.t+r.a+r.r,n=!first&&!seen.has(k);seen.add(k);const c=/buy/i.test(r.a)?"up":/sell|stop/i.test(r.a)?"dn":"am";return`<div class="run ${n?'new':''}"><b class="cy">${r.t}</b> <b class="${c}">${r.a}</b><div>${r.r}</div></div>`}).join("");first=false;
- $("tr").innerHTML="<span class='lbl'>Recent trades</span> "+((d.tr||[]).filter(t=>t&&t.a&&t.p!=null).map(t=>`<span class="${t.a=='BUY'?'up':'dn'}"><b>${t.a}</b></span> ${t.s} @ ${fp(t.p)} (${m(t.n)}) ${t.t}`).join(" · ")||"none")+` · fixes: ${d.fx}`;try{extra()}catch(e){}charts();try{hype(d)}catch(e){}if(OP)try{drawPos()}catch(e){}setTimeout(fit,50)}
+ $("tr").innerHTML="<span class='lbl'>Recent trades</span> "+((d.tr||[]).filter(t=>t&&t.a&&t.p!=null).map(t=>`<span class="${t.a=='BUY'?'up':'dn'}"><b>${t.a}</b></span> ${t.s||""} @ ${fp(t.p)} (${m(t.n)}) ${t.t}`).join(" · ")||"none")+` · fixes: ${d.fx}`;try{extra()}catch(e){}charts();try{hype(d)}catch(e){}if(OP)try{drawPos()}catch(e){}setTimeout(fit,50)}
 let LID=null,PB=0,LASTOK=0;const ft=(u,ms)=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);return fetch(u,{cache:"no-store",signal:c.signal}).finally(()=>clearTimeout(t))};
 async function poll(full){if(PB&&Date.now()-PB<20000)return;PB=Date.now();try{const since=(!full&&LID)?LID:"20m";let r=await ft("https://ntfy.sh/"+TOPIC+"/json?poll=1&since="+since+"&_="+Date.now(),15000);if(!r.ok)throw new Error(r.status);let ls=(await r.text()).trim().split("\n").filter(Boolean);
  if(!ls.length&&!D){r=await ft(DATA1+"&_="+Date.now(),15000);ls=(await r.text()).trim().split("\n").filter(Boolean)}LASTOK=Date.now();
@@ -249,6 +252,16 @@ function bar(p,b){const row=$$("u_"+p.s)&&$$("u_"+p.s).closest(".pos");if(!row)r
  const f=Math.max(0,Math.min(1,(b-p.st)/(L.t-p.st)));el.querySelector("i").style.width=f*100+"%";el.querySelector("b").style.left=f*100+"%";el.querySelector("em").textContent=L.n+" "+fp(L.t);el.title="stop "+fp(p.st)+" → "+L.n+" "+fp(L.t)}
 window.onPx=(p,b)=>{bar(p,b);const u=b-p.e,was=sgn[p.s];sgn[p.s]=u>0;if(was===false&&u>0){const r=$$("u_"+p.s)&&$$("u_"+p.s).closest(".pos");if(r){r.classList.remove("win");void r.offsetWidth;r.classList.add("win")}chime()}};
 const R0=render;render=function(){R0.apply(this,arguments);try{const ps=D.pos||[];$$("pos").classList.toggle("dense",ps.length>=5);ps.forEach(p=>{bar(p,p.b);if(sgn[p.s]==null)sgn[p.s]=p.b>p.e})}catch(_){}};
+// win/loss tracker + resting entries
+function wlr(){try{const w=D&&D.wl,e=$$("wl"),pe=$$("pe");if(pe){const a=(D&&D.pe)||[];pe.innerHTML=a.map(o=>`⏳ ${String(o[0]).replace(/-USDC?$/,"")} buy @${fp(o[1])}`).join(" · ");pe.title=a.map(o=>`${o[0]} resting limit ${o[1]}, stop ${o[2]}, $${o[3]} on hold (counted as cash)`).join("\n")}
+ if(!e)return;if(!w){e.innerHTML="";return}const m=v=>v==null?"—":(v<0?"−$":"+$")+Math.abs(v).toFixed(2),n=w.w+w.l;
+ if(!n){e.innerHTML='<span class="mut">🏁 0-0 · first result pending</span>';return}
+ const dots=(w.z||"").split("").map(c=>`<i style="background:${c==="W"?"#2ef29a":"#ff4d6d"};box-shadow:0 0 5px ${c==="W"?"#2ef29a":"#ff4d6d"}"></i>`).join(""),sk=w.sk>1?` · 🔥${w.sk}`:w.sk<-1?` · 🧊${-w.sk}`:"",d=w.d||[0,0,0];
+ const sp=Object.entries(w.sp||{}).map(([k,v])=>`${k} ${v[0]}-${v[1]} ${m(v[2])}`).join(", ");
+ e.innerHTML=`<span><span class="w">W ${w.w}</span> · <span class="l">L ${w.l}</span> · ${Math.round(100*w.w/n)}% · <span style="color:${w.n>=0?"#2ef29a":"#ff4d6d"}">${m(w.n)}</span>${sk}</span><span class="dots">${dots}</span><span class="mut">today ${d[0]}-${d[1]} ${m(d[2])}</span>`;
+ e.title=`All-time ${w.w}-${w.l}, net ${m(w.n)}\nAvg win ${m(w.aw)} · avg loss ${m(w.al)} · best ${m(w.b)}\nToday ${d[0]}-${d[1]} ${m(d[2])}${sp?"\nBy sleeve: "+sp:""}`}catch(_){}}
+const R1=render;render=function(){R1.apply(this,arguments);wlr()};
+
 // strip: fear&greed + top movers
 const pw=$$("poswrap");if(pw){const st=document.createElement("div");st.className="card";st.id="strip";st.innerHTML='<div id="fng" title="Crypto Fear & Greed">F&G <span class="gg"><b style="left:50%"></b></span><span id="fngv">—</span></div><div id="mv"><div id="mvi">Loading top movers…</div></div>';pw.after(st)}
 async function fng(){try{const r=await fetch("https://api.alternative.me/fng/?limit=1",{cache:"no-store"});if(!r.ok)throw 0;const d=(await r.json()).data[0],v=+d.value;
@@ -265,10 +278,10 @@ setTimeout(movers,1500);setInterval(movers,150000);
 })()
 </script><script>
 /* equity chart: feed points + live 30s samples (localStorage, 48h), browser-only */
-(()=>{const K="eqlive_v1",H48=172800;let L=[];try{L=JSON.parse(localStorage.getItem(K)||"[]").filter(p=>Array.isArray(p)&&p.length==2)}catch(e){L=[]}
+(()=>{const K="eqlive_v2";try{localStorage.removeItem("eqlive_v1")}catch(_){}const K0=0,H48=172800;let L=[];try{L=JSON.parse(localStorage.getItem(K)||"[]").filter(p=>Array.isArray(p)&&p.length==2)}catch(e){L=[]}
 const save=()=>{try{localStorage.setItem(K,JSON.stringify(L))}catch(e){}};
 window.eqLive=v=>{if(!(v>0))return;const t=Date.now()/1000,l=L[L.length-1];if(l&&t-l[0]<30)return;L.push([Math.round(t),+v.toFixed(2)]);L=L.filter(p=>p[0]>=t-H48);save();if(EQR=="1D"||EQR=="7D")try{drawEq()}catch(e){}};
-window.eqPrune=d=>{const w=d.eq||[];if(!w.length)return;const lt=w[w.length-1][0];/* feed refreshed: live samples up to the newest feed point are superseded */L=L.filter(p=>p[0]>lt);save()};
+window.eqPrune=d=>{const w=d.eq||[];if(!w.length)return;const lt=w[w.length-1][0];/* feed refreshed: live samples up to the newest feed point are superseded */const fv=+d.val||w[w.length-1][1];L=L.filter(p=>p[0]>lt&&(!fv||Math.abs(p[1]/fv-1)<.05));save()};
 const fmt=v=>"$"+(Math.abs(v)>=1e4?Math.round(v).toLocaleString():v.toLocaleString(undefined,{maximumFractionDigits:Math.abs(v)>=100?0:2}));
 function tparse(str,ref){const mm=/(\d+):(\d+)\s*([AP]M)/i.exec(str||"");if(!mm)return null;let h=+mm[1]%12+(mm[3].toUpperCase()=="PM"?12:0);const r=new Date(ref*1000),d=new Date(r);d.setHours(h,+mm[2],0,0);let t=d/1000;if(t>ref+300)t-=86400;return t}
 let G=null;
@@ -326,7 +339,7 @@ if(D)try{drawEq()}catch(e){}})();
 </script>
 <script>
 /* self-update: compare to version.json (no-store); reload with cache-buster on change */
-const APP_V="202610271151";
+const APP_V="202610271219";
 (()=>{let busy=0;async function chk(){if(busy)return;busy=1;try{const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});if(r.ok){const v=(await r.json()).v;if(v&&v!==APP_V){const u=new URL(location.href);u.searchParams.set("v",v);location.replace(u.toString());return}}}catch(e){}busy=0}
 setInterval(chk,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()});addEventListener("pageshow",chk);setTimeout(chk,3000);
 if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{})})();
