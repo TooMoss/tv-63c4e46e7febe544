@@ -155,7 +155,7 @@ function render(){const d=D;$("val").textContent=m(d.val);$("day").textContent=s
 async function poll(){try{let r=await fetch(DATA+"&_="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error(r.status);let ls=(await r.text()).trim().split("\n").filter(Boolean);
  if(!ls.length){r=await fetch(DATA1+"&_="+Date.now(),{cache:"no-store"});ls=(await r.text()).trim().split("\n").filter(Boolean)}
  let j=null,x=null;for(const l of ls){try{const o=JSON.parse(JSON.parse(l).message);if(o.k==="x")x=o;else j=o}catch(e){}}
- const nx=x&&(!X||x.asof!==X.asof);if(j&&window.eqPrune)try{eqPrune(j)}catch(e){}if(nx)X=x;if(j&&(!D||j.asof!==D.asof)){D=j;render()}else if(nx&&D)render();$("err").textContent=""}catch(e){$("err").textContent="data retry… "+new Date().toLocaleTimeString()}}
+ const nx=x&&(!X||x.asof!==X.asof);if(j&&window.eqPrune)try{eqPrune(j)}catch(e){}if(nx)X=x;if(j&&(!D||j.asof!==D.asof)){const was=D;D=j;render();if(was&&window.runDone)try{runDone(was,j)}catch(e){}}else if(nx&&D)render();$("err").textContent=""}catch(e){$("err").textContent="data retry… "+new Date().toLocaleTimeString()}}
 function eqSel(){const d=D,now=Date.now()/1000,a=(X&&X.ea)||[],w=(d.eq||[]);if(EQR=="1D")return w.filter(p=>p[0]>=now-86400);if(EQR=="7D")return w;
  const f=w.length?w[0][0]:1e12,m=a.filter(p=>p[0]<f).concat(w);return EQR=="30D"?m.filter(p=>p[0]>=now-30*86400):m}
 function px(s){return(X&&X.p||[]).find(q=>q.s===s)||{}}
@@ -177,7 +177,7 @@ function hist(){const c=(X&&X.c)||[],strs=[...new Set(c.map(r=>r[1]).filter(Bool
 function rvFull(){const v=X&&X.rv;show(`<h2>Daily review</h2>`+(v&&v.h?`<p><b>${v.ti||""}</b></p><p style="margin-top:.5em">${v.t.split(" • ").join("<br>• ")}</p>${v.g?`<p class="sm" style="margin-top:.6em">Top gainers: ${v.g}</p>`:""}`:"<p>First review runs tonight at 8:47 PM CT.</p>"))}
 addEventListener("keydown",e=>{if(e.key==="Escape")cls()});
 function tick(){if(!D)return;const age=(Date.now()-new Date(D.last))/1000,stale=age>1800;$("live").className="live "+(stale?"off":"on");$("lt").textContent=stale?"STALE":"LIVE";
- const s=600-age,c=$("cd");if(s<=0){if(!c.classList.contains("due")){c.classList.add("due");c.textContent="Run due any moment"}return}c.classList.remove("due");c.textContent=Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0")}
+ const s=600-age,c=$("cd");if(s<=0){c.classList.add("due");const om=Math.floor(-s/60),t=om<1?"Scanning…":"Scanning… ("+om+"m)";if(c.textContent!==t)c.textContent=t;return}c.classList.remove("due");c.textContent=Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0")}
 
 
 let HI=0,hm=[],seenA=new Set(),hfirst=true,peakSeen=0;
@@ -323,10 +323,19 @@ if(D)try{drawEq()}catch(e){}})();
 </script>
 <script>
 /* self-update: compare to version.json (no-store); reload with cache-buster on change */
-const APP_V="202610271040";
+const APP_V="202610271115";
 (()=>{let busy=0;async function chk(){if(busy)return;busy=1;try{const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});if(r.ok){const v=(await r.json()).v;if(v&&v!==APP_V){const u=new URL(location.href);u.searchParams.set("v",v);location.replace(u.toString());return}}}catch(e){}busy=0}
 setInterval(chk,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()});addEventListener("pageshow",chk);setTimeout(chk,3000);
 if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{})})();
+</script>
+<script>
+/* run-finished: reset countdown flash + toast; poll on wake */
+(()=>{const st=document.createElement("style");st.textContent="#rtoast{position:fixed;left:50%;top:14px;transform:translate(-50%,-140%);z-index:99;background:rgba(14,22,58,.96);border:1px solid rgba(46,242,154,.6);color:#e8ecff;padding:8px 16px;border-radius:999px;font-weight:800;font-size:clamp(13px,1.2vw,30px);box-shadow:0 0 24px rgba(46,242,154,.35);transition:transform .45s cubic-bezier(.2,1.4,.4,1);pointer-events:none;white-space:nowrap}#rtoast.on{transform:translate(-50%,0)}.cdflash{animation:cdf 1.4s ease-out}@keyframes cdf{0%{color:#2ef29a;text-shadow:0 0 28px #2ef29a;transform:scale(1.15)}100%{}}";document.head.appendChild(st);
+const t=document.createElement("div");t.id="rtoast";document.body.appendChild(t);let h;
+window.runDone=(a,b)=>{const c=$("cd");if(c){c.classList.remove("due","cdflash");void c.offsetWidth;c.classList.add("cdflash")}try{tick()}catch(e){}
+ const dv=(b.val!=null&&a.val!=null)?b.val-a.val:null,tm=new Date(b.last).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
+ t.innerHTML=`✅ Run finished ${tm} · ${m(b.val)}${dv!=null?` <span class="${cl(dv)}">${sg(dv)}</span>`:""}`;t.classList.add("on");clearTimeout(h);h=setTimeout(()=>t.classList.remove("on"),6000)};
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)poll()});addEventListener("pageshow",()=>poll());addEventListener("focus",()=>poll())})();
 </script>
 </body></html>
 <script>(()=>{const o=new MutationObserver(m=>m.forEach(r=>{const e=r.target.nodeType==3?r.target.parentElement:r.target;if(e&&e.closest&&e.closest('.top')){e.classList.remove('flash');void e.offsetWidth;e.classList.add('flash')}}));addEventListener('load',()=>document.querySelectorAll('.top').forEach(t=>o.observe(t,{characterData:true,childList:true,subtree:true})))})()</script>
