@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Grok Bot Trader TV</title>
+<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><title>Grok Bot Trader TV</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%2305060d%22/%3E%3Cpath d=%22M5 23l7-8 5 5 10-12%22 stroke=%22%232ef29a%22 stroke-width=%223.5%22 fill=%22none%22 stroke-linecap=%22round%22/%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
@@ -319,6 +319,13 @@ const off=()=>{const g=$("eqx");if(g)g.style.display="none"};
 const sv=$("eq");sv.addEventListener("mousemove",hov);sv.addEventListener("mouseleave",off);sv.addEventListener("touchstart",hov,{passive:true});sv.addEventListener("touchmove",hov,{passive:true});sv.addEventListener("touchend",()=>setTimeout(off,2500));
 let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{try{drawEq()}catch(e){}},150)});
 if(D)try{drawEq()}catch(e){}})();
+</script>
+<script>
+/* self-update: compare to version.json (no-store); reload with cache-buster on change */
+const APP_V="202610271017";
+(()=>{let busy=0;async function chk(){if(busy)return;busy=1;try{const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});if(r.ok){const v=(await r.json()).v;if(v&&v!==APP_V){const u=new URL(location.href);u.searchParams.set("v",v);location.replace(u.toString());return}}}catch(e){}busy=0}
+setInterval(chk,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()});addEventListener("pageshow",chk);setTimeout(chk,3000);
+if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{})})();
 </script>
 </body></html>
 <script>(()=>{const o=new MutationObserver(m=>m.forEach(r=>{const e=r.target.nodeType==3?r.target.parentElement:r.target;if(e&&e.closest&&e.closest('.top')){e.classList.remove('flash');void e.offsetWidth;e.classList.add('flash')}}));addEventListener('load',()=>document.querySelectorAll('.top').forEach(t=>o.observe(t,{characterData:true,childList:true,subtree:true})))})()</script>
