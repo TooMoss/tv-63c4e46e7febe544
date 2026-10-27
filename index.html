@@ -323,7 +323,7 @@ if(D)try{drawEq()}catch(e){}})();
 </script>
 <script>
 /* self-update: compare to version.json (no-store); reload with cache-buster on change */
-const APP_V="202610271115";
+const APP_V="202610271128";
 (()=>{let busy=0;async function chk(){if(busy)return;busy=1;try{const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});if(r.ok){const v=(await r.json()).v;if(v&&v!==APP_V){const u=new URL(location.href);u.searchParams.set("v",v);location.replace(u.toString());return}}}catch(e){}busy=0}
 setInterval(chk,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()});addEventListener("pageshow",chk);setTimeout(chk,3000);
 if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{})})();
@@ -334,7 +334,7 @@ if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)navigator.s
 const t=document.createElement("div");t.id="rtoast";document.body.appendChild(t);let h;
 window.runDone=(a,b)=>{const c=$("cd");if(c){c.classList.remove("due","cdflash");void c.offsetWidth;c.classList.add("cdflash")}try{tick()}catch(e){}
  const dv=(b.val!=null&&a.val!=null)?b.val-a.val:null,tm=new Date(b.last).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
- t.innerHTML=`✅ Run finished ${tm} · ${m(b.val)}${dv!=null?` <span class="${cl(dv)}">${sg(dv)}</span>`:""}`;t.classList.add("on");clearTimeout(h);h=setTimeout(()=>t.classList.remove("on"),6000)};
+ t.innerHTML=`✅ Run finished ${tm} · ${m(b.val)}${dv!=null?` <span class="${cl(dv)}">${sg(dv)}</span>`:""}`;t.classList.add("on");clearTimeout(h);h=setTimeout(()=>t.classList.remove("on"),12000)};
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)poll()});addEventListener("pageshow",()=>poll());addEventListener("focus",()=>poll())})();
 </script>
 </body></html>
