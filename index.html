@@ -278,7 +278,7 @@ fng();setInterval(fng,3600e3);
 const POP=["BTC","ETH","SOL","XRP","DOGE","ADA","AVAX","LINK","DOT","LTC","SHIB","UNI","NEAR","SUI","PEPE","AAVE","ZEC","DASH","BCH","HBAR"];
 async function movers(){let L=[];
  {
-  const syms=[...new Set(POP.concat((D&&D.pos||[]).map(p=>p.s.replace(/-USDC?$/,""))))].slice(0,24);
+  const syms=[...new Set(POP.concat((D&&D.pos||[]).map(p=>p.s.replace(/-FUT SHORT$/,"").replace(/-USDC?$/,""))))].slice(0,24);
   for(let i=0;i<syms.length;i+=5){await Promise.all(syms.slice(i,i+5).map(async s=>{try{const r=await fetch(CB+s+"-USD/stats");if(!r.ok)return;const t=await r.json();if(+t.open>0)L.push([s,+t.last,(t.last/t.open-1)*100])}catch(_){}}));await new Promise(z=>setTimeout(z,700))}}
  L=L.filter(x=>isFinite(x[2])).sort((a,b)=>b[2]-a[2]).slice(0,12);if(!L.length)return;
  const PM=window.MVP||{};window.MVP={};$$("mvi").innerHTML="🔥 Top movers 24h: "+L.map(x=>{const v=x[2].toFixed(1),o=PM[x[0]];MVP[x[0]]=v;const f=o!=null&&o!==v?(+v>+o?" mvu":" mvd"):"";return`<span class="mvx${f}"><b>${x[0]}</b> <span class="${x[2]>=0?'up':'dn'}">${x[2]>=0?"+":""}${v}%</span></span>`}).join("")}
