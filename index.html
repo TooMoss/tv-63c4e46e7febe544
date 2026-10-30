@@ -120,6 +120,7 @@ body{padding:clamp(4px,1.2vw,40px)}
 <div class="col">
  <div class="card" id="hype"><span>Warming up…</span></div>
  <div class="card" id="fm"><div class="lbl">Bitcoin filters · buys unlock when green</div><div id="fmr"></div></div>
+ <div class="card"><div class="lbl">Strategy status</div><div id="ssw" class="sm">Loading…</div></div>
  <div class="card"><div class="lbl">Daily review <span class="tb"><button onclick="hist()">📜 Trade history</button><button onclick="rvFull()">🧠 Full review</button></span></div><div id="rvw">First review runs tonight at 8:47 PM CT.</div></div>
  <div class="card"><div class="lbl">Top candidates</div><div id="cand"></div></div>
  <div class="card feed"><div class="lbl">Live run feed</div><div id="runs"></div></div>
@@ -166,6 +167,7 @@ function eqSel(){const d=D,now=Date.now()/1000,a=(X&&X.ea)||[],w=(d.eq||[]);if(E
 function px(s){return(X&&X.p||[]).find(q=>q.s===s)||{}}
 function plv(p){const q=px(p.s),L=[{v:p.e,c:"#38d8ff",n:"ENTRY"},{v:p.st,c:"#ff4d6d",n:"STOP"}];if(q.tr)L.push({v:q.tr,c:"#ffc145",n:"TRAIL"});if(q.ad)L.push({v:q.ad,c:"#b388ff",n:"ADD"});return L}
 function extra(){const f=(X&&X.f)||[];$("fmr").innerHTML=f.length?f.map(r=>{const w=Math.min(50,Math.abs(r.d)*10);return`<div class="fr"><b>${r.n==="SQZ6H"?"6h vs SMA200":"Daily vs SMA20"}</b><div class="bar"><i style="left:${r.d>=0?50:50-w}%;width:${w}%;background:${r.on||r.d>=0?"#2ef29a":"#ff4d6d"}"></i><i style="left:50%;width:2px;background:#e8ecff"></i></div><span class="${r.d>=0?'up':'dn'}">${r.d>0?"+":""}${r.d}% ${r.d<0?"· need +"+r.nd+"%":"✅"}</span></div>`}).join(""):'<div class="sm">Loading filters…</div>';
+ const ss=(X&&X.ss)||[],SC={live:"#2ef29a",paper:"#ffc145",paused:"#ff4d6d"};$("ssw").innerHTML=ss.length?ss.map(r=>`<span title="${r[2]||""}" style="display:inline-block;margin:2px 8px 2px 0"><b style="color:${SC[r[1]]||"#aaa"}">●</b> ${r[0]} <span style="color:${SC[r[1]]||"#aaa"}">${r[1]}</span></span>`).join(""):"Status not published yet.";
  const v=X&&X.rv;$("rvw").innerHTML=v&&v.h?`<b>${v.ti||"Nightly review"}</b> — ${v.t}`:"First review runs tonight at 8:47 PM CT."}
 function cls(){$("ov").classList.remove("on");OP=null}
 function show(h){$("ovb").innerHTML='<button class="x" onclick="cls()">✕</button>'+h;$("ov").classList.add("on")}
@@ -345,7 +347,7 @@ if(D)try{drawEq()}catch(e){}})();
 <script>
 /* self-update: compare to version.json (no-store); reload with cache-buster on change */
 function plc(p){try{const a=p.pl;if(!a)return"";const k=a[0],v=a[1]!=null?fp(a[1]):"";const T={h:["🔒 ½ @"+v,"Lock @+1R: sell half"],H:["½ ✓ BE","Half taken, BE stop"],l:["🔒 BE @"+v,"Lock @+1.5R → BE"],B:["✓ BE · trail @"+v,"BE locked, trail from +2.5R"],T:["✓ trail "+v,"Trailing 1R"]}[k];return T?` <span class="plk${k==k.toUpperCase()?" ok":""}" title="${T[1]}">${T[0]}</span>`:""}catch(e){return""}}
-const APP_V="202610281110";
+const APP_V="202610300946";
 (()=>{let busy=0;async function chk(){if(busy)return;busy=1;try{const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});if(r.ok){const v=(await r.json()).v;if(v&&v!==APP_V&&new URL(location.href).searchParams.get("v")!==v){const u=new URL(location.href);u.searchParams.set("v",v);location.replace(u.toString());return}}}catch(e){}busy=0}
 setInterval(chk,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()});addEventListener("pageshow",chk);setTimeout(chk,3000);
 if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{})})();
