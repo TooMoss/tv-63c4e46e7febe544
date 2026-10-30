@@ -344,18 +344,18 @@ if(D)try{drawEq()}catch(e){}})();
 <script>
 /* self-update: compare to version.json (no-store); reload with cache-buster on change */
 function plc(p){try{const a=p.pl;if(!a)return"";const k=a[0],v=a[1]!=null?fp(a[1]):"";const T={h:["🔒 ½ @"+v,"Lock @+1R: sell half"],H:["½ ✓ BE","Half taken, BE stop"],l:["🔒 BE @"+v,"Lock @+1.5R → BE"],B:["✓ BE · trail @"+v,"BE locked, trail from +2.5R"],T:["✓ trail "+v,"Trailing 1R"]}[k];return T?` <span class="plk${k==k.toUpperCase()?" ok":""}" title="${T[1]}">${T[0]}</span>`:""}catch(e){return""}}
-const APP_V="202610301018";
+const APP_V="202610301019";
 (()=>{let busy=0;async function chk(){if(busy)return;busy=1;try{const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});if(r.ok){const v=(await r.json()).v;if(v&&v!==APP_V&&new URL(location.href).searchParams.get("v")!==v){const u=new URL(location.href);u.searchParams.set("v",v);location.replace(u.toString());return}}}catch(e){}busy=0}
 setInterval(chk,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()});addEventListener("pageshow",chk);setTimeout(chk,3000);
 if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{})})();
 </script>
 <script>
 /* run-finished: reset countdown flash + toast; poll on wake */
-(()=>{const st=document.createElement("style");st.textContent="#rtoast{position:fixed;left:50%;top:14px;transform:translate(-50%,-140%);z-index:99;background:rgba(14,22,58,.96);border:1px solid rgba(46,242,154,.6);color:#e8ecff;padding:8px 16px;border-radius:999px;font-weight:800;font-size:clamp(13px,1.2vw,30px);box-shadow:0 0 24px rgba(46,242,154,.35);transition:transform .45s cubic-bezier(.2,1.4,.4,1);pointer-events:none;white-space:nowrap}#rtoast.on{transform:translate(-50%,0)}.cdflash{animation:cdf 1.4s ease-out}@keyframes cdf{0%{color:#2ef29a;text-shadow:0 0 28px #2ef29a;transform:scale(1.15)}100%{}}";document.head.appendChild(st);
+(()=>{const st=document.createElement("style");st.textContent="#rtoast{position:fixed;right:12px;bottom:10px;z-index:99;background:rgba(14,22,58,.85);border:1px solid rgba(46,242,154,.35);color:#cfd6ff;padding:3px 10px;border-radius:999px;font-weight:600;font-size:clamp(10px,.8vw,18px);opacity:0;transition:opacity .4s;pointer-events:none;white-space:nowrap}#rtoast.on{opacity:.9}.hb.pulse{animation:hbz .5s 3}@keyframes hbz{50%{transform:scale(1.8);box-shadow:0 0 10px #2ef29a}}.cdflash{animation:cdf 1.4s ease-out}@keyframes cdf{0%{color:#2ef29a;text-shadow:0 0 28px #2ef29a;transform:scale(1.15)}100%{}}";document.head.appendChild(st);
 const t=document.createElement("div");t.id="rtoast";document.body.appendChild(t);let h;
 window.runDone=(a,b)=>{const c=$("cd");if(c){c.classList.remove("due","cdflash");void c.offsetWidth;c.classList.add("cdflash")}try{tick()}catch(e){}
  const dv=(b.val!=null&&a.val!=null)?b.val-a.val:null,tm=new Date(b.last).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
- t.innerHTML=`✅ Run finished ${tm} · ${m(b.val)}${dv!=null?` <span class="${cl(dv)}">${sg(dv)}</span>`:""}`;t.classList.add("on");clearTimeout(h);h=setTimeout(()=>t.classList.remove("on"),12000)};
+ t.innerHTML=`✅ Run finished ${tm} · ${m(b.val)}${dv!=null?` <span class="${cl(dv)}">${sg(dv)}</span>`:""}`;t.classList.add("on");clearTimeout(h);h=setTimeout(()=>t.classList.remove("on"),2000);const hb=$("hb");if(hb){hb.classList.remove("pulse");void hb.offsetWidth;hb.classList.add("pulse")}};
 document.addEventListener("visibilitychange",()=>{if(!document.hidden){PB=0;poll(true)}});addEventListener("pageshow",()=>{PB=0;poll(true)});addEventListener("focus",()=>{PB=0;poll(true)})})();
 </script>
 </body></html>
