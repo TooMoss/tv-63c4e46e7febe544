@@ -294,7 +294,7 @@ async function movers(){let L=[];
  {
   const syms=(window.B&&B.bd&&B.bd.length)?B.bd.map(r=>r[0]):[...new Set(POP.concat((D&&D.pos||[]).map(p=>p.s.replace(/-FUT SHORT$/,"").replace(/-USDC?$/,""))))].slice(0,24);window.LIVE33=window.LIVE33||{};
   for(let i=0;i<syms.length;i+=5){await Promise.all(syms.slice(i,i+5).map(async s=>{try{const r=await fetch(CB+s+"-USD/stats");if(!r.ok)return;const t=await r.json();if(+t.open>0){L.push([s,+t.last,(t.last/t.open-1)*100]);LIVE33[s]=[+t.last,(t.last/t.open-1)*100]}}catch(_){}}));await new Promise(z=>setTimeout(z,700))}}
- L=L.filter(x=>isFinite(x[2])).sort((a,b)=>b[2]-a[2]);if(!L.length)return;try{bdDraw()}catch(_){}if(window.B&&B.bd){tkDraw(L);return}L=L.slice(0,12);
+ L=L.filter(x=>isFinite(x[2])).sort((a,b)=>b[2]-a[2]);if(!L.length)return;try{bdDraw()}catch(_){}if(window.B&&B.bd){tkDraw(L);const t=L[0];$$("mvi").innerHTML=`🔥 Top mover of our ${L.length} coins (24h): <span class="mvx"><b>${t[0]}</b> <span class="${t[2]>=0?"up":"dn"}">${t[2]>=0?"+":""}${t[2].toFixed(1)}%</span></span>`;return}L=L.slice(0,12);
  const PM=window.MVP||{};window.MVP={};$$("mvi").innerHTML="🔥 Top movers 24h: "+L.map(x=>{const v=x[2].toFixed(1),o=PM[x[0]];MVP[x[0]]=v;const f=o!=null&&o!==v?(+v>+o?" mvu":" mvd"):"";return`<span class="mvx${f}"><b>${x[0]}</b> <span class="${x[2]>=0?'up':'dn'}">${x[2]>=0?"+":""}${v}%</span></span>`}).join("");mvFit()}
 function mvFit(){const c=$$("mvi");if(!c)return;const R0=c.getBoundingClientRect().right;c.querySelectorAll(".mvx").forEach(e=>e.style.display="");c.querySelectorAll(".mvx").forEach(e=>{const r=e.getBoundingClientRect();if(r.right>R0+1)e.style.display="none"})}
 addEventListener("resize",()=>setTimeout(mvFit,120));
@@ -366,7 +366,7 @@ if(D)try{drawEq()}catch(e){}})();
 <script>
 /* self-update: compare to version.json (no-store); reload with cache-buster on change */
 function plc(p){try{const a=p.pl;if(!a)return"";const k=a[0],v=a[1]!=null?fp(a[1]):"";const T={h:["🔒 ½ @"+v,"Lock @+1R: sell half"],H:["½ ✓ BE","Half taken, BE stop"],l:["🔒 BE @"+v,"Lock @+1.5R → BE"],B:["✓ BE · trail @"+v,"BE locked, trail from +2.5R"],T:["✓ trail "+v,"Trailing 1R"]}[k];return T?` <span class="plk${k==k.toUpperCase()?" ok":""}" title="${T[1]}">${T[0]}</span>`:""}catch(e){return""}}
-const APP_V="202610311025";
+const APP_V="202610311035";
 (()=>{let busy=0;async function chk(){if(busy)return;busy=1;try{const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});if(r.ok){const v=(await r.json()).v;if(v&&v!==APP_V){const k="rl_"+v,n=+(sessionStorage.getItem(k)||0);if(n<3){sessionStorage.setItem(k,n+1);const u=new URL(location.href);u.searchParams.set("v",v);u.searchParams.set("r",Date.now().toString(36));location.replace(u.toString());return}}}}catch(e){}busy=0}
 setInterval(chk,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()});addEventListener("pageshow",chk);setTimeout(chk,3000);
 if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{})})();
@@ -408,7 +408,7 @@ window.bdDraw=function(){const b=window.B;if(!b||!b.bd)return;const L=window.LIV
 window.tkDraw=function(L){const t=document.querySelector("#tkr .tkt");if(!t)return;const H=held();const h=L.map(x=>`<span class="tx"><b>${x[0]}${H.has(x[0])?" ●":""}</b> <span class="${x[2]>=0?"up":"dn"}">${x[2]>=0?"▲ +":"▼ "}${x[2].toFixed(1)}%</span></span>`).join("");t.innerHTML="24h · "+h+"<span class='tx'>│</span>24h · "+h;t.style.setProperty("--tks",Math.max(40,L.length*3.2)+"s")};
 function heatDraw(){const b=window.B,h=b&&b.hm;if(!h)return;const el=$$("heat"),lv=Math.max(0,Math.min(100,h[1]||0)),hot=h[0]==="hot";
  el.className=hot?"hot":"";const i=el.querySelector(".hbar i");i.style.width=Math.max(3,lv)+"%";i.style.background=hot?"linear-gradient(90deg,#ffc145,#ff4d6d)":lv>=60?"#ffc145":"#2ef29a";
- $$("heatv").innerHTML=`<b style="color:${hot?"#ff4d6d":h[0]==="active"?"#ffc145":"#2ef29a"}">${(h[0]||"?").toUpperCase()}${hot?" 🔥":""}</b>`+(h[2]?` · ${h[2]} ${h[3]>0?"+":""}${h[3]}% 15m`:"")}
+ $$("heatv").innerHTML=`<b style="color:${hot?"#ff4d6d":h[0]==="active"?"#ffc145":"#2ef29a"}">${(h[0]||"?").toUpperCase()}${hot?" 🔥":""}</b> <span style="opacity:.8">${hot?"(faster checks)":h[0]==="active"?"(watching, no extra runs)":h[0]==="calm"?"(normal hourly schedule)":"(watcher not updating)"}</span>`+(h[2]?` · ${h[2]} ${h[3]>0?"+":""}${h[3]}% 15m`:"")}
 const SEEN=new Set();let F0=true;
 window.fillFx=function(d){const tr=(d.tr||[]).filter(t=>t&&t.p!=null&&t.a);const ks=tr.map(t=>[t.e,t.s,t.a,t.p].join("|"));
  if(F0){ks.forEach(k=>SEEN.add(k));F0=false;return}const nw=tr.filter((t,i)=>!SEEN.has(ks[i]));ks.forEach(k=>SEEN.add(k));if(!nw.length)return;
