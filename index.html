@@ -129,7 +129,7 @@ details.sm[open]{position:relative;z-index:3}
 </div>
 <div class="col">
  <div class="card" id="hype"><span>Warming up…</span></div>
- <div class="card" id="fm"><div class="lbl">Bitcoin filters · buys unlock when green</div><div id="fmr"></div></div>
+ <div class="card" id="fm"><div class="lbl">Bitcoin filters · gate WBO/WBOX/EXP_RB buys</div><div id="fmr"></div><div id="fmu" class="sm" style="margin-top:4px"></div></div>
  <div class="card"><div class="lbl">Strategy status <span id="htw" class="sm"></span></div><div id="ssw" class="sm">Loading…</div><details class="sm" style="opacity:.75;margin-top:.3em"><summary>What do these mean?</summary>live = trades real money · paper = simulated, proving itself before going live · paused = switched off. DIP4H: buy 4-hour dips (retired) · EXPAND4H: buy 4-hour range breakouts · ORB: US-open "opening range breakout" · WBO1D: daily breakout to a 20-day high (10 majors) · WBOX1D: same idea on altcoins · FSHORT: futures short on breakdowns · SQZ: volatility-squeeze breakouts · ER/ER3: momentum buys. MOVERS4H: buy 4-hour top movers on a volume surge · EXP_RB / FS_RB: rebuilt EXPAND4H / FSHORT (now live). <b>Heat</b> = account lost if every stop hits (cap 6%). <b>R</b> = profit/loss in units of the risk taken (−1R = full stop-out).</details></div>
  <div class="card"><div class="lbl">Daily review <span class="tb"><button onclick="hist()">📜 Trade history</button><button onclick="rvFull()">🧠 Full review</button></span></div><div id="rvw">First review runs tonight at 8:47 PM CT.</div></div>
  <div class="card"><div class="lbl">Top candidates</div><div id="cand"></div></div>
@@ -177,6 +177,7 @@ function eqSel(){const d=D,now=Date.now()/1000,a=(X&&X.ea)||[],w=(d.eq||[]);if(E
 function px(s){return(X&&X.p||[]).find(q=>q.s===s)||{}}
 function plv(p){const q=px(p.s),L=[{v:p.e,c:"#38d8ff",n:"ENTRY"},{v:p.st,c:"#ff4d6d",n:"STOP"}];if(q.tr)L.push({v:q.tr,c:"#ffc145",n:"TRAIL"});if(q.ad)L.push({v:q.ad,c:"#b388ff",n:"ADD"});return L}
 function extra(){const f=(X&&X.f)||[];$("fmr").innerHTML=f.length?f.map(r=>{const w=Math.min(50,Math.abs(r.d)*10);return`<div class="fr"><b>${r.n==="SQZ6H"?"6h vs SMA200":"Daily vs SMA20"}</b><div class="bar"><i style="left:${r.d>=0?50:50-w}%;width:${w}%;background:${r.on||r.d>=0?"#2ef29a":"#ff4d6d"}"></i><i style="left:50%;width:2px;background:#e8ecff"></i></div><span class="${r.d>=0?'up':'dn'}">${r.d>0?"+":""}${r.d}% ${r.d<0?"· need +"+r.nd+"%":"✅"}</span></div>`}).join(""):'<div class="sm">Loading filters…</div>';
+ {const UG=["RSBO1D","MOVERS4H","CRASH4H","FS_RB"],lv=((X&&X.ss)||[]).filter(r=>r[1]==="live").map(r=>r[0]),ug=UG.filter(n=>lv.includes(n)),red=f.some(r=>r.d<0&&!r.on);$("fmu").innerHTML=!f.length?"":red?`<span class="dn">BTC-gated buys off</span>${ug.length?` · <span class="up">${ug.join("/")} still active</span>`:""}`:`<span class="up">BTC-gated buys on</span>${ug.length?` · ${ug.join("/")} ungated`:""}`}
  if(X&&X.ht!=null)$("htw").textContent="· heat "+X.ht+"% of 6% cap";const ss=((X&&X.ss)||[]).slice().sort((a,b)=>({live:0,paper:1,paused:2}[a[1]]??3)-({live:0,paper:1,paused:2}[b[1]]??3)),SC={live:"#2ef29a",paper:"#ffc145",paused:"#ff4d6d"};$("ssw").innerHTML=ss.length?ss.map(r=>`<span title="${r[2]||""}" style="display:inline-block;margin:2px 8px 2px 0"><b style="color:${SC[r[1]]||"#aaa"}">●</b> ${r[0]} <span style="color:${SC[r[1]]||"#aaa"}">${r[1]}</span></span>`).join("")+`<div style="opacity:.7">${ss.filter(r=>r[1]=="live").length} live · ${ss.filter(r=>r[1]=="paused").length} paused (off)</div>`:"Status not published yet.";
  const v=X&&X.rv;$("rvw").innerHTML=v&&v.h?`<b>${v.ti||"Nightly review"}</b> — ${v.t}`:"First review runs tonight at 8:47 PM CT."}
 function cls(){$("ov").classList.remove("on");OP=null}
@@ -362,7 +363,7 @@ if(D)try{drawEq()}catch(e){}})();
 <script>
 /* self-update: compare to version.json (no-store); reload with cache-buster on change */
 function plc(p){try{const a=p.pl;if(!a)return"";const k=a[0],v=a[1]!=null?fp(a[1]):"";const T={h:["🔒 ½ @"+v,"Lock @+1R: sell half"],H:["½ ✓ BE","Half taken, BE stop"],l:["🔒 BE @"+v,"Lock @+1.5R → BE"],B:["✓ BE · trail @"+v,"BE locked, trail from +2.5R"],T:["✓ trail "+v,"Trailing 1R"]}[k];return T?` <span class="plk${k==k.toUpperCase()?" ok":""}" title="${T[1]}">${T[0]}</span>`:""}catch(e){return""}}
-const APP_V="202610302150";
+const APP_V="202610302200";
 (()=>{let busy=0;async function chk(){if(busy)return;busy=1;try{const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});if(r.ok){const v=(await r.json()).v;if(v&&v!==APP_V&&new URL(location.href).searchParams.get("v")!==v){const u=new URL(location.href);u.searchParams.set("v",v);location.replace(u.toString());return}}}catch(e){}busy=0}
 setInterval(chk,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()});addEventListener("pageshow",chk);setTimeout(chk,3000);
 if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{})})();
