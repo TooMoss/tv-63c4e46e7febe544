@@ -125,7 +125,7 @@ details.sm[open]{position:relative;z-index:3}
   <div class="lbl" id="nlb" style="margin-top:.8vw">Next run in</div><div class="cd cy" id="cd">--:--</div><button class="btn" id="rfb" style="display:none;margin:.3em 0" onclick="const u=new URL(location.href);u.searchParams.set('r',Date.now());location.replace(u)">↻ Tap to refresh</button><div class="sm" id="last"></div></div></div>
  <div class="card chart"><div class="lbl">Account value <span class="tb" id="eqb"></span> <span id="eqi" class="sm" style="white-space:nowrap;font-weight:600;letter-spacing:0;text-transform:none"></span></div><svg id="eq" viewBox="0 0 800 170" preserveAspectRatio="none"></svg></div>
  <div class="card" id="poswrap"><div class="lbl">Open positions <span id="wl"></span><span id="pe"></span></div><div id="pos"></div></div>
- <div class="card chart"><div class="lbl" id="rgl">BTC 6h · SMA200</div><svg id="btc" viewBox="0 0 800 150" preserveAspectRatio="none"></svg></div>
+ <div class="card chart"><div class="lbl" id="rgl">BTC 6h · SMA200</div><div id="btct" style="display:flex;gap:14px;flex-wrap:wrap;font-weight:700;font-size:15px;margin:2px 0 4px"></div><svg id="btc" viewBox="0 0 800 150" preserveAspectRatio="none"></svg></div>
 </div>
 <div class="col">
  <div class="card" id="hype"><span>Warming up…</span></div>
@@ -157,7 +157,7 @@ async function charts(){if(!D)return;
  try{let k=(await cb("BTC-USD",21600)).slice().reverse();const em=k.map((x,i)=>{if(i<199)return null;let t=0;for(let j=i-199;j<=i;j++)t+=k[j][4];return[x[0],t/200]});const n=Math.min(60,k.length-199);k=k.slice(-n);const em2=em.slice(-n);
   const all=k.map(x=>[x[0],x[4]]).concat(em2);const ys=all.map(p=>p[1]),y0=Math.min(...ys),y1=Math.max(...ys),x0=k[0][0],x1=k[k.length-1][0];
   const path=(pts,col)=>{const d=pts.map((p,i)=>(i?"L":"M")+((p[0]-x0)/(x1-x0)*800).toFixed(1)+","+(146-(p[1]-y0)/(y1-y0)*140).toFixed(1)).join("");return`<path d="${d}" fill="none" stroke="${col}" stroke-width="3"/>`};
-  $("btc").innerHTML=path(k.map(x=>[x[0],x[4]]),"#ffc145")+path(em2,"#b388ff")+`<text x="8" y="22" fill="#ffc145" font-size="18" font-weight="700">BTC ${fp(k[k.length-1][4])}</text><text x="8" y="44" fill="#b388ff" font-size="18">6h SMA200 ${fp(em2[em2.length-1][1])} · ${k[k.length-1][4]>=em2[em2.length-1][1]?"above ✅":"below ⛔"}</text>`}catch(e){}}
+  $("btc").innerHTML=path(k.map(x=>[x[0],x[4]]),"#ffc145")+path(em2,"#b388ff");$("btct").innerHTML=`<span style="color:#ffc145">BTC ${fp(k[k.length-1][4])}</span><span style="color:#b388ff">6h SMA200 ${fp(em2[em2.length-1][1])}</span><span>${k[k.length-1][4]>=em2[em2.length-1][1]?"above ✅":"below ⛔"}</span>`}catch(e){}}
 function render(){const d=D;$("val").textContent=m(d.val);$("day").textContent=sg(d.day);$("day").className=cl(d.day);$("week").textContent=sg(d.week);$("week").className=cl(d.week);
  $("last").textContent="Last check "+CTt((d.lc&&new Date(d.lc)>new Date(TZ(d.last)))?d.lc:TZ(d.last))+" CT"+" · equity (cash + futures P/L) "+m(d.cash)+" · "+(d.rg.n||"")+" coins";{let a=$("avc");if(!a){a=document.createElement("div");a.id="avc";a.className="card sm";a.style.cssText="color:#38d8ff;line-height:1.35";$("hype").after(a)}const vm=(X&&X.vm)||null,MC={calm:"#2ef29a",active:"#ffc145",hot:"#ff4d6d"};a.innerHTML='<span id="hb" class="hb"></span> 🤖 '+(d.av||"Working…").replace(/[;,.]?\s*next (surge check|run|check)\s*~?[^;.]*/ig,"")+(vm&&vm[0]?'<br><b style="color:'+(MC[vm[0]]||"#aaa")+'">Market mood: '+vm[0]+(vm[0]=="hot"?" 🔥 checking more often":"")+'</b>'+(vm[1]?' · '+vm[1]:''):'')}
  const eq=eqSel();$("eqb").innerHTML=["1D","7D","30D","All"].map(k=>`<button class="${k==EQR?'on':''}" onclick="EQR='${k}';render()">${k}</button>`).join("");try{drawEq()}catch(e){console.warn(e)}
@@ -281,8 +281,11 @@ const R1=render;render=function(){try{R1.apply(this,arguments)}catch(e){console.
 
 // strip: fear&greed + top movers
 const pw=$$("poswrap");if(pw){const st=document.createElement("div");st.className="card";st.id="strip";st.innerHTML='<div id="fng" title="Crypto Fear & Greed">F&G <span class="gg"><b style="left:50%"></b></span><span id="fngv">—</span></div><div id="mv"><div id="mvi">Loading top movers…</div></div>';pw.after(st)}
-async function fng(){try{const r=await fetch("https://api.alternative.me/fng/?limit=1",{cache:"no-store"});if(!r.ok)throw 0;const d=(await r.json()).data[0],v=+d.value;
- const c=v<25?"#ff4d6d":v<45?"#ff9b5a":v<55?"#ffc145":v<75?"#9be86a":"#2ef29a";$$("fngv").innerHTML=`<span style="color:${c}">${v} ${d.value_classification}</span>`;document.querySelector("#fng .gg b").style.left=v+"%"}catch(_){}}
+function fngShow(d){const v=+d.value;
+ const c=v<25?"#ff4d6d":v<45?"#ff9b5a":v<55?"#ffc145":v<75?"#9be86a":"#2ef29a";$$("fngv").innerHTML=`<span style="color:${c}">${v} ${d.value_classification}</span>`;document.querySelector("#fng .gg b").style.left=v+"%"}
+async function fng(n=0){try{const c=JSON.parse(localStorage.getItem("fng")||"null");if(c&&n===0)fngShow(c)}catch(_){}
+ try{const r=await fetch("https://api.alternative.me/fng/?limit=1",{cache:"no-store"});if(!r.ok)throw 0;const d=(await r.json()).data[0];if(!d||isNaN(+d.value))throw 0;fngShow(d);try{localStorage.setItem("fng",JSON.stringify({value:d.value,value_classification:d.value_classification}))}catch(_){}}
+ catch(_){if(n<5)setTimeout(()=>fng(n+1),15e3*(n+1))}}
 fng();setInterval(fng,3600e3);
 const POP=["BTC","ETH","SOL","XRP","DOGE","ADA","AVAX","LINK","DOT","LTC","SHIB","UNI","NEAR","SUI","PEPE","AAVE","ZEC","DASH","BCH","HBAR"];
 async function movers(){let L=[];
@@ -359,7 +362,7 @@ if(D)try{drawEq()}catch(e){}})();
 <script>
 /* self-update: compare to version.json (no-store); reload with cache-buster on change */
 function plc(p){try{const a=p.pl;if(!a)return"";const k=a[0],v=a[1]!=null?fp(a[1]):"";const T={h:["🔒 ½ @"+v,"Lock @+1R: sell half"],H:["½ ✓ BE","Half taken, BE stop"],l:["🔒 BE @"+v,"Lock @+1.5R → BE"],B:["✓ BE · trail @"+v,"BE locked, trail from +2.5R"],T:["✓ trail "+v,"Trailing 1R"]}[k];return T?` <span class="plk${k==k.toUpperCase()?" ok":""}" title="${T[1]}">${T[0]}</span>`:""}catch(e){return""}}
-const APP_V="202610301530";
+const APP_V="202610302150";
 (()=>{let busy=0;async function chk(){if(busy)return;busy=1;try{const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});if(r.ok){const v=(await r.json()).v;if(v&&v!==APP_V&&new URL(location.href).searchParams.get("v")!==v){const u=new URL(location.href);u.searchParams.set("v",v);location.replace(u.toString());return}}}catch(e){}busy=0}
 setInterval(chk,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()});addEventListener("pageshow",chk);setTimeout(chk,3000);
 if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{})})();
