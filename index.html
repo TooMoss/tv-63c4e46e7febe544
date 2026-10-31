@@ -366,7 +366,7 @@ if(D)try{drawEq()}catch(e){}})();
 <script>
 /* self-update: compare to version.json (no-store); reload with cache-buster on change */
 function plc(p){try{const a=p.pl;if(!a)return"";const k=a[0],v=a[1]!=null?fp(a[1]):"";const T={h:["🔒 ½ @"+v,"Lock @+1R: sell half"],H:["½ ✓ BE","Half taken, BE stop"],l:["🔒 BE @"+v,"Lock @+1.5R → BE"],B:["✓ BE · trail @"+v,"BE locked, trail from +2.5R"],T:["✓ trail "+v,"Trailing 1R"]}[k];return T?` <span class="plk${k==k.toUpperCase()?" ok":""}" title="${T[1]}">${T[0]}</span>`:""}catch(e){return""}}
-const APP_V="202610311030";
+const APP_V="202610311025";
 (()=>{let busy=0;async function chk(){if(busy)return;busy=1;try{const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});if(r.ok){const v=(await r.json()).v;if(v&&v!==APP_V){const k="rl_"+v,n=+(sessionStorage.getItem(k)||0);if(n<3){sessionStorage.setItem(k,n+1);const u=new URL(location.href);u.searchParams.set("v",v);u.searchParams.set("r",Date.now().toString(36));location.replace(u.toString());return}}}}catch(e){}busy=0}
 setInterval(chk,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()});addEventListener("pageshow",chk);setTimeout(chk,3000);
 if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{})})();
@@ -390,7 +390,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden){PB=0;poll
 #bd{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin-top:6px}
 .bc{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:5px 7px;font-size:12px;line-height:1.25;min-width:0}
 .bc.held{border-color:#2ef29a;box-shadow:0 0 6px rgba(46,242,154,.35)}.bc b{font-size:13px}.bc .pb{height:5px;border-radius:3px;background:rgba(255,255,255,.08);margin:3px 0;overflow:hidden}.bc .pb i{display:block;height:100%}
-.bc .bw{opacity:.7;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bc .bw{opacity:.7;font-size:11px;white-space:normal;overflow-wrap:anywhere}
 @media(max-width:820px){#bd{grid-template-columns:repeat(2,minmax(0,1fr))}}
 #fflash{position:fixed;left:50%;top:14%;transform:translateX(-50%);z-index:10;background:#0f1a2e;border:2px solid #2ef29a;border-radius:12px;padding:12px 18px;font-weight:800;font-size:18px;box-shadow:0 0 30px rgba(46,242,154,.6);animation:ffl 4.5s forwards;pointer-events:none}@keyframes ffl{0%{opacity:0;transform:translate(-50%,-10px) scale(.9)}10%{opacity:1;transform:translate(-50%,0) scale(1)}80%{opacity:1}100%{opacity:0}}
 </style><script>
